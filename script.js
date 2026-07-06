@@ -284,10 +284,16 @@ function renderFolder(key) {
     const data = folderData[key];
     if (!data || !libraryPanel) return;
 
+    const isShared = data.status === "shared";
+    const statusLabel = isShared ? "Shared Library" : "Local only";
+    const statusStyle = isShared
+        ? "border-color: var(--mint); color: var(--mint); box-shadow: 0 0 0 3px var(--mint-dim);"
+        : "";
+
     libraryPanel.innerHTML = `
         <div class="library-panel-header">
             <h3>${data.label}</h3>
-            <span class="status-pill ${data.status}">${data.status === "shared" ? "Shared Library" : "Local only"}</span>
+            <span class="status-pill ${data.status}" style="${statusStyle}">${statusLabel}</span>
         </div>
         <p>${data.summary}</p>
         <ul>${data.points.map((point) => `<li>${point}</li>`).join("")}</ul>
