@@ -128,7 +128,6 @@ const selectedSkillPanel = document.getElementById("selectedSkill");
 const createSkillForm = document.getElementById("createSkillForm");
 const createSkillQuestion = document.getElementById("createSkillQuestion");
 const createSkillAnswer = document.getElementById("createSkillAnswer");
-const createSkillNext = document.getElementById("createSkillNext");
 
 const pipelineSteps = pipelineTrack ? Array.from(pipelineTrack.querySelectorAll(".flow-node")) : [];
 const skillOptions = {
@@ -234,17 +233,21 @@ function requestCreateSkillDetails() {
         if (createSkillQuestion) createSkillQuestion.textContent = question.label;
         if (createSkillAnswer) {
             createSkillAnswer.value = "";
-            createSkillAnswer.placeholder = question.placeholder;
+            createSkillAnswer.placeholder = `${question.placeholder} Press Enter to continue.`;
             createSkillAnswer.focus();
-        }
-        if (createSkillNext) {
-            createSkillNext.textContent = index === questions.length - 1 ? "Simulate Skill Creation" : "Next";
         }
     };
 
     showQuestion();
 
     return new Promise((resolve) => {
+        const handleAnswerKeydown = (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                createSkillForm.requestSubmit();
+            }
+        };
+
         const handleSubmit = (event) => {
             event.preventDefault();
             const question = questions[index];
@@ -262,10 +265,16 @@ function requestCreateSkillDetails() {
 
             createSkillForm.hidden = true;
             createSkillForm.removeEventListener("submit", handleSubmit);
+            if (createSkillAnswer) {
+                createSkillAnswer.removeEventListener("keydown", handleAnswerKeydown);
+            }
             resolve(answers);
         };
 
         createSkillForm.addEventListener("submit", handleSubmit);
+        if (createSkillAnswer) {
+            createSkillAnswer.addEventListener("keydown", handleAnswerKeydown);
+        }
     });
 }
 
