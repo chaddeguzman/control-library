@@ -1,5 +1,6 @@
 param(
-    [string]$SkillPath
+    [string]$SkillPath,
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -296,6 +297,7 @@ function Get-AlwaysOnFiles {
         Get-ChildItem -LiteralPath $SearchDir -Recurse -File |
             Where-Object {
                 -not $_.Name.StartsWith(".") -and
+                $_.Name -ne "README.md" -and
                 $AlwaysOnExtensions -contains $_.Extension.ToLowerInvariant()
             } |
             Sort-Object FullName |
@@ -354,6 +356,51 @@ function Select-Skill {
     } until ($valid)
 
     return $skills[$parsed - 1].FullName
+}
+
+function Test-CodexCli {
+    $command = Get-Command codex -ErrorAction SilentlyContinue
+    return $null -ne $command
+}
+
+function Write-SelectedContextLog {
+    param(
+        [System.IO.FileInfo]$Skill,
+        [string]$SkillText
+    )
+
+    $hardRules = @(Get-AlwaysOnFiles -SearchDir $HardRulesDir)
+    $validationChecks = @(Get-AlwaysOnFiles -SearchDir $ValidationChecksDir)
+    $matchingReferences = @(Get-MatchingReferences -Skill $Skill -SkillText $SkillText -SearchDir $ReferenceDir)
+    $matchingTemplates = @(Get-MatchingReferences -Skill $Skill -SkillText $SkillText -SearchDir $TemplateDir)
+
+    Write-Log "Hard rule files loaded: $($hardRules.Count)"
+    foreach ($rule in $hardRules) {
+        Write-Log "Included hard rule: $($rule.RelativePath)"
+    }
+
+    Write-Log "Validation check files loaded: $($validationChecks.Count)"
+    foreach ($check in $validationChecks) {
+        Write-Log "Included validation check: $($check.RelativePath)"
+    }
+
+    if ($matchingReferences.Count -eq 0) {
+        Write-Log "No matching reference files found for skill: $($Skill.BaseName)"
+    }
+    else {
+        foreach ($reference in $matchingReferences) {
+            Write-Log "Included reference for $($Skill.BaseName): $($reference.RelativePath)"
+        }
+    }
+
+    if ($matchingTemplates.Count -eq 0) {
+        Write-Log "No matching template files found for skill: $($Skill.BaseName)"
+    }
+    else {
+        foreach ($template in $matchingTemplates) {
+            Write-Log "Included template for $($Skill.BaseName): $($template.RelativePath)"
+        }
+    }
 }
 
 function Invoke-CodexTransform {
@@ -502,7 +549,9 @@ try {
 
     if ($pendingFiles.Count -eq 0) {
         Write-Log "No pending supported files found."
-        exit 0
+        if (-not $DryRun) {
+            exit 0
+        }
     }
 
     $successCount = 0
@@ -519,6 +568,23 @@ try {
 
     foreach ($skipped in $skippedFiles) {
         Write-Log "Skipping unsupported file type: $($skipped.Name)" "WARN"
+    }
+
+    if ($DryRun) {
+        $skillText = Get-Content -LiteralPath $skillItem.FullName -Raw -Encoding UTF8
+        Write-SelectedContextLog -Skill $skillItem -SkillText $skillText
+        Write-Log "Dry run enabled. Codex CLI is not required, no files will be generated, and inbound files will not be moved."
+        Write-Log "Pending supported files: $($pendingFiles.Count)"
+        foreach ($file in $pendingFiles) {
+            $previewOutputPath = Get-SafeOutputPath -SourceFile $file.Name
+            Write-Log "Would process: $($file.Name) -> $([System.IO.Path]::GetFileName($previewOutputPath))"
+        }
+        Write-Log "Dry run complete."
+        exit 0
+    }
+
+    if (-not (Test-CodexCli)) {
+        throw "Codex CLI was not found. Install and authenticate Codex CLI to generate output, or run 'Run Skill.bat -DryRun' to validate the workflow without Codex."
     }
 
     foreach ($file in $pendingFiles) {

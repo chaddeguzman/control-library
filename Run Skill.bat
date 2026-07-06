@@ -12,7 +12,7 @@ if not exist "%RUNNER%" (
     exit /b 1
 )
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%RUNNER%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%RUNNER%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 
 echo.

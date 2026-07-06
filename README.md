@@ -101,4 +101,12 @@ Unsupported files stay in `1 inbound/` and are recorded in the run log.
 
 The runner uses `codex exec`. Codex CLI must be installed and authenticated locally.
 
+To validate the workflow without Codex CLI or output generation, run:
+
+```powershell
+.\Run Skill.bat -DryRun
+```
+
+Dry run checks the selected skill, always-on rules, validation checks, matching references, matching templates, and pending inbound files without creating output or moving source files.
+
 Each run writes a log file to `2 harness/logs/`.
