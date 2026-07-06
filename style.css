@@ -758,7 +758,7 @@ pre code {
     white-space: nowrap;
 }
 
-.status-pill.synced {
+.status-pill.shared {
     border-color: var(--mint);
     color: var(--mint);
 }
