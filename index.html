@@ -101,7 +101,7 @@ Run Skill.bat</code></pre>
                 <div class="pipeline" id="pipelineTrack" aria-label="Control Library pipeline diagram">
                     <div class="flow-node" data-log="Reading source file from 1 inbound/">Source file<span>1 inbound/</span></div>
                     <div class="flow-node" data-log="Launching 2 harness/run-inbound-skill.ps1">Run harness<span>2 harness/</span></div>
-                    <div class="flow-node" data-log="Menu built from 3 skills/">Choose skill<span>3 skills/</span></div>
+                    <div class="flow-node" data-step="choose-skill" data-log="Menu built from 3 skills/">Choose skill<span>3 skills/</span></div>
                     <div class="flow-node" data-log="Loading hard rules and validation checks">Load rules<span>2 harness/</span></div>
                     <div class="flow-node" data-log="Scanning 4 references/ for a topic match">Load references<span>4 references/</span></div>
                     <div class="flow-node" data-branch="tech" data-log="Cross-checking 5 templates/ for structure">Cross-check template<span>5 templates/</span></div>
@@ -117,6 +117,11 @@ Run Skill.bat</code></pre>
                 <div class="pipeline-controls">
                     <p class="pipeline-hint">Simulated run &mdash; mirrors what <code>Run Skill.bat</code> does locally.</p>
                     <button class="primary-action" type="button" id="runPipeline">Run simulation</button>
+                </div>
+                <div class="skill-choice" id="skillChoice" hidden aria-live="polite">
+                    <span>Choose skill</span>
+                    <button type="button" class="skill-choice-btn" data-skill="tech">Technical Specs</button>
+                    <button type="button" class="skill-choice-btn" data-skill="func">Functional Specs</button>
                 </div>
 
                 <div class="console">

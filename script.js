@@ -123,8 +123,26 @@ const runButton = document.getElementById("runPipeline");
 const consoleOutput = document.getElementById("consoleOutput");
 const consoleDot = document.getElementById("consoleDot");
 const branchCards = document.querySelectorAll(".branch-card");
+const skillChoice = document.getElementById("skillChoice");
+const skillChoiceButtons = document.querySelectorAll(".skill-choice-btn");
 
 const pipelineSteps = pipelineTrack ? Array.from(pipelineTrack.querySelectorAll(".flow-node")) : [];
+const skillOptions = {
+    tech: {
+        label: "Technical Specs",
+        file: "TechSpecGen.md",
+        branch: "tech",
+        template: "Tech spec template",
+        output: "technical-spec.md",
+    },
+    func: {
+        label: "Functional Specs",
+        file: "FuncSpecGen.md",
+        branch: "func",
+        template: "Functional spec template",
+        output: "functional-spec.md",
+    },
+};
 
 function logLine(text, ok) {
     if (!consoleOutput) return;
@@ -154,6 +172,34 @@ function sleep(ms) {
     return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+function chooseSkill() {
+    if (!skillChoice) return Promise.resolve(skillOptions.tech);
+
+    skillChoice.hidden = false;
+    skillChoiceButtons.forEach((button) => {
+        button.disabled = false;
+        button.classList.remove("is-selected");
+    });
+
+    return new Promise((resolve) => {
+        const handleChoice = (event) => {
+            const button = event.currentTarget;
+            const selected = skillOptions[button.dataset.skill] || skillOptions.tech;
+            skillChoiceButtons.forEach((btn) => {
+                btn.disabled = true;
+                btn.classList.toggle("is-selected", btn === button);
+            });
+            window.setTimeout(() => {
+                skillChoice.hidden = true;
+                skillChoiceButtons.forEach((btn) => btn.removeEventListener("click", handleChoice));
+                resolve(selected);
+            }, 260);
+        };
+
+        skillChoiceButtons.forEach((button) => button.addEventListener("click", handleChoice));
+    });
+}
+
 async function runPipelineSimulation() {
     if (!pipelineSteps.length || !runButton) return;
 
@@ -167,6 +213,9 @@ async function runPipelineSimulation() {
 
     pipelineSteps.forEach((n) => n.classList.remove("is-active", "is-done"));
     branchCards.forEach((b) => b.classList.remove("is-active"));
+    if (skillChoice) skillChoice.hidden = true;
+
+    let selectedSkill = null;
 
     for (let i = 0; i < pipelineSteps.length; i += 1) {
         const node = pipelineSteps[i];
@@ -176,12 +225,20 @@ async function runPipelineSimulation() {
 
         logLine(node.dataset.log || node.textContent.trim());
 
+        if (node.dataset.step === "choose-skill") {
+            logLine("Waiting for skill selection...");
+            selectedSkill = await chooseSkill();
+            logLine(`Selected skill: ${selectedSkill.file}`, true);
+        }
+
         if (node.dataset.branch) {
             await sleep(280);
-            const branch = document.querySelector(`.branch-card[data-branch="${node.dataset.branch}"]`);
+            const branchKey = selectedSkill?.branch || node.dataset.branch;
+            const branch = document.querySelector(`.branch-card[data-branch="${branchKey}"]`);
             if (branch) {
                 branch.classList.add("is-active");
-                logLine(branch.dataset.log || `Matched ${branch.textContent.trim()}`, true);
+                const templateLabel = selectedSkill?.template || branch.textContent.trim();
+                logLine(`Matched ${templateLabel}`, true);
             }
         }
 
@@ -194,6 +251,9 @@ async function runPipelineSimulation() {
         pipelineToken.classList.remove("is-live");
     }
 
+    if (selectedSkill) {
+        logLine(`Markdown written to 6 output/${selectedSkill.output}`, true);
+    }
     logLine("Run complete. Log written to 2 harness/logs/", true);
     if (consoleDot) consoleDot.classList.remove("is-live");
 
