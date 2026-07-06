@@ -134,11 +134,11 @@ const skillOptions = {
     tech: {
         label: "Technical Specs",
         file: "TechSpecGen.md",
-        inboundFile: "1 inbound/ZR_SALES_REPORT.md",
+        inboundFile: "1 inbound/ZSD_SALESREPORT.txt",
         fileType: "Reports",
         fileTypeDescription: "Reports program",
         template: "Reports Template.md",
-        output: "ZR_SALES_REPORT - tech specs.md",
+        output: "ZSD_SALESREPORT - tech specs.md",
     },
     func: {
         label: "Functional Specs",
