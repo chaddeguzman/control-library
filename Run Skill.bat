@@ -2,7 +2,7 @@
 setlocal
 
 set "PROJECT_ROOT=%~dp0"
-set "RUNNER=%PROJECT_ROOT%5 harness\run-inbound-skill.ps1"
+set "RUNNER=%PROJECT_ROOT%2 harness\run-inbound-skill.ps1"
 
 if not exist "%RUNNER%" (
     echo Runner not found:

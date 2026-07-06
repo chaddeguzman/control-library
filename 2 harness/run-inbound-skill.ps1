@@ -7,9 +7,10 @@ $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $InboundDir = Join-Path $ProjectRoot "1 inbound"
 $DoneDir = Join-Path $InboundDir "Done"
-$OutboundDir = Join-Path $ProjectRoot "2 outbound"
-$ReferenceDir = Join-Path $ProjectRoot "3 references"
-$SkillsDir = Join-Path $ProjectRoot "6 skills"
+$OutboundDir = Join-Path $ProjectRoot "6 output"
+$ReferenceDir = Join-Path $ProjectRoot "4 references"
+$TemplateDir = Join-Path $ProjectRoot "5 templates"
+$SkillsDir = Join-Path $ProjectRoot "3 skills"
 $LogDir = Join-Path $PSScriptRoot "logs"
 $SupportedExtensions = @(".txt", ".md", ".markdown", ".csv", ".json", ".xml", ".log")
 $ReferenceExtensions = @(".md", ".markdown")
@@ -171,10 +172,11 @@ function Split-ReferenceMetadataList {
 function Get-MatchingReferences {
     param(
         [System.IO.FileInfo]$Skill,
-        [string]$SkillText
+        [string]$SkillText,
+        [string]$SearchDir
     )
 
-    if (-not (Test-Path -LiteralPath $ReferenceDir)) {
+    if (-not (Test-Path -LiteralPath $SearchDir)) {
         return @()
     }
 
@@ -190,7 +192,7 @@ function Get-MatchingReferences {
     ) | Where-Object { $_ }
 
     $references = @(
-        Get-ChildItem -LiteralPath $ReferenceDir -Recurse -File |
+        Get-ChildItem -LiteralPath $SearchDir -Recurse -File |
             Where-Object {
                 -not $_.Name.StartsWith(".") -and
                 $ReferenceExtensions -contains $_.Extension.ToLowerInvariant()
@@ -257,17 +259,18 @@ function Get-MatchingReferences {
 
 function Format-ReferenceContext {
     param(
-        [array]$References
+        [array]$References,
+        [string]$Label = "Reference file"
     )
 
     if ($References.Count -eq 0) {
-        return "No matching reference files were found."
+        return "No matching files were found."
     }
 
     $blocks = @()
     foreach ($reference in $References) {
         $blocks += @(
-            "Reference file: $($reference.RelativePath)"
+            "${Label}: $($reference.RelativePath)"
             '```markdown'
             $reference.Text
             '```'
@@ -310,7 +313,8 @@ function Invoke-CodexTransform {
 
     $skillText = Get-Content -LiteralPath $SelectedSkill -Raw -Encoding UTF8
     $skillItem = Get-Item -LiteralPath $SelectedSkill
-    $matchingReferences = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText)
+    $matchingReferences = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText -SearchDir $ReferenceDir)
+    $matchingTemplates = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText -SearchDir $TemplateDir)
     if ($matchingReferences.Count -eq 0) {
         Write-Log "No matching reference files found for skill: $($skillItem.BaseName)"
     }
@@ -319,7 +323,16 @@ function Invoke-CodexTransform {
             Write-Log "Included reference for $($skillItem.BaseName): $($reference.RelativePath)"
         }
     }
-    $referenceContext = Format-ReferenceContext -References $matchingReferences
+    if ($matchingTemplates.Count -eq 0) {
+        Write-Log "No matching template files found for skill: $($skillItem.BaseName)"
+    }
+    else {
+        foreach ($template in $matchingTemplates) {
+            Write-Log "Included template for $($skillItem.BaseName): $($template.RelativePath)"
+        }
+    }
+    $referenceContext = Format-ReferenceContext -References $matchingReferences -Label "Reference file"
+    $templateContext = Format-ReferenceContext -References $matchingTemplates -Label "Template file"
     $sourceText = Get-Content -LiteralPath $Source.FullName -Raw -Encoding UTF8
     $relativeSource = Get-ProjectRelativePath -Path $Source.FullName
     $relativeOutput = Get-ProjectRelativePath -Path $OutputPath
@@ -339,6 +352,9 @@ function Invoke-CodexTransform {
         ""
         "Reference context:"
         $referenceContext
+        ""
+        "Template context:"
+        $templateContext
         ""
         "Source file:"
         $relativeSource
@@ -404,6 +420,7 @@ try {
         Get-ChildItem -LiteralPath $InboundDir -File |
             Where-Object {
                 -not $_.Name.StartsWith(".") -and
+                $_.Name -ne "README.md" -and
                 $SupportedExtensions -contains $_.Extension.ToLowerInvariant()
             } |
             Sort-Object Name
@@ -411,7 +428,7 @@ try {
 
     Write-Log "Selected skill: $($skillItem.FullName)"
     Write-Log "Inbound folder: $InboundDir"
-    Write-Log "Outbound folder: $OutboundDir"
+    Write-Log "Output folder: $OutboundDir"
 
     if ($pendingFiles.Count -eq 0) {
         Write-Log "No pending supported files found."
@@ -424,6 +441,7 @@ try {
         Get-ChildItem -LiteralPath $InboundDir -File |
             Where-Object {
                 -not $_.Name.StartsWith(".") -and
+                $_.Name -ne "README.md" -and
                 -not ($SupportedExtensions -contains $_.Extension.ToLowerInvariant())
             } |
             Sort-Object Name

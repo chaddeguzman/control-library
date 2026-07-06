@@ -194,7 +194,7 @@ async function runPipelineSimulation() {
         pipelineToken.classList.remove("is-live");
     }
 
-    logLine("Run complete. Log written to 5 harness/logs/", true);
+    logLine("Run complete. Log written to 2 harness/logs/", true);
     if (consoleDot) consoleDot.classList.remove("is-live");
 
     runButton.disabled = false;
@@ -225,18 +225,28 @@ const folderData = {
             "<code>1 inbound/Done/</code> holds originals after a successful run.",
         ],
     },
-    outbound: {
-        label: "2 outbound/",
-        status: "local",
-        summary: "Where finished Markdown documents land after a run, the thing you actually came here for.",
+    harness: {
+        label: "2 harness/",
+        status: "shared",
+        summary: "The shared library runner that ties source file, skill, references, and template together.",
         points: [
-            "One generated file per processed source file.",
-            "Built from the source file, the chosen skill, matched references, and template guidance.",
-            "Not committed to GitHub; treated as local output only.",
+            "<code>run-inbound-skill.ps1</code> is invoked by <code>Run Skill.bat</code>.",
+            "Uses <code>codex exec</code>, so the Codex CLI must be installed and authenticated locally.",
+            "<code>2 harness/logs/</code> keeps a record of every run. Logs stay local, the script is shared.",
+        ],
+    },
+    skills: {
+        label: "3 skills/",
+        status: "shared",
+        summary: "Shared library instructions describing exactly what kind of document Codex should produce.",
+        points: [
+            "Ships with <code>TechSpecGen.md</code> and <code>FuncSpecGen.md</code>.",
+            "Add a new <code>.md</code> file here and it appears in the <code>Run Skill.bat</code> menu on the next run.",
+            "Keep instructions focused on the transformation. Push shared context to <code>4 references/</code> instead.",
         ],
     },
     references: {
-        label: "3 references/",
+        label: "4 references/",
         status: "shared",
         summary: "Shared library guidance a skill can pull in automatically: standards, examples, coding practices, review guidance.",
         points: [
@@ -246,7 +256,7 @@ const folderData = {
         ],
     },
     templates: {
-        label: "4 templates/",
+        label: "5 templates/",
         status: "shared",
         summary: "Shared library structures the skill cross-checks output against before writing the final document.",
         points: [
@@ -255,24 +265,14 @@ const folderData = {
             "Update a template once and every future run benefits from it.",
         ],
     },
-    harness: {
-        label: "5 harness/",
-        status: "shared",
-        summary: "The shared library runner that ties source file, skill, references, and template together.",
+    output: {
+        label: "6 output/",
+        status: "local",
+        summary: "Where finished Markdown documents land after a run, the thing you actually came here for.",
         points: [
-            "<code>run-inbound-skill.ps1</code> is invoked by <code>Run Skill.bat</code>.",
-            "Uses <code>codex exec</code>, so the Codex CLI must be installed and authenticated locally.",
-            "<code>5 harness/logs/</code> keeps a record of every run. Logs stay local, the script is shared.",
-        ],
-    },
-    skills: {
-        label: "6 skills/",
-        status: "shared",
-        summary: "Shared library instructions describing exactly what kind of document Codex should produce.",
-        points: [
-            "Ships with <code>TechSpecGen.md</code> and <code>FuncSpecGen.md</code>.",
-            "Add a new <code>.md</code> file here and it appears in the <code>Run Skill.bat</code> menu on the next run.",
-            "Keep instructions focused on the transformation. Push shared context to <code>3 references/</code> instead.",
+            "One generated file per processed source file.",
+            "Built from the source file, the chosen skill, matched references, and template guidance.",
+            "Not committed to GitHub; treated as local output only.",
         ],
     },
 };

@@ -85,7 +85,7 @@ Run Skill.bat</code></pre>
                 <article class="step-card">
                     <span class="step-number">4</span>
                     <h3>Review the output</h3>
-                    <p>Find generated Markdown in <code>2 outbound/</code>; the source moves to <code>1 inbound/Done/</code>.</p>
+                    <p>Find generated Markdown in <code>6 output/</code>; the source moves to <code>1 inbound/Done/</code>.</p>
                 </article>
             </div>
         </section>
@@ -100,11 +100,11 @@ Run Skill.bat</code></pre>
             <div class="pipeline-wrap">
                 <div class="pipeline" id="pipelineTrack" aria-label="Control Library pipeline diagram">
                     <div class="flow-node" data-log="Reading source file from 1 inbound/">Source file<span>1 inbound/</span></div>
-                    <div class="flow-node" data-log="Launching Run Skill.bat">Run harness<span>Run Skill.bat</span></div>
-                    <div class="flow-node" data-log="Menu built from 6 skills/">Choose skill<span>6 skills/</span></div>
-                    <div class="flow-node" data-log="Scanning 3 references/ for a topic match">Load references<span>3 references/</span></div>
-                    <div class="flow-node" data-branch="tech" data-log="Cross-checking 4 templates/ for structure">Cross-check template<span>4 templates/</span></div>
-                    <div class="flow-node" data-log="Markdown written to 2 outbound/">Generate output<span>2 outbound/</span></div>
+                    <div class="flow-node" data-log="Launching 2 harness/run-inbound-skill.ps1">Run harness<span>2 harness/</span></div>
+                    <div class="flow-node" data-log="Menu built from 3 skills/">Choose skill<span>3 skills/</span></div>
+                    <div class="flow-node" data-log="Scanning 4 references/ for a topic match">Load references<span>4 references/</span></div>
+                    <div class="flow-node" data-branch="tech" data-log="Cross-checking 5 templates/ for structure">Cross-check template<span>5 templates/</span></div>
+                    <div class="flow-node" data-log="Markdown written to 6 output/">Generate output<span>6 output/</span></div>
                     <div class="pipeline-token" id="pipelineToken" aria-hidden="true"></div>
                 </div>
                 <div class="flow-branches">
@@ -121,7 +121,7 @@ Run Skill.bat</code></pre>
                 <div class="console">
                     <div class="console-header">
                         <span><span class="console-dot" id="consoleDot"></span>run log</span>
-                        <span>5 harness/logs/</span>
+                        <span>2 harness/logs/</span>
                     </div>
                     <pre class="console-output" id="consoleOutput"><span class="console-placeholder">Press "Run simulation" to watch a file move through the pipeline.</span></pre>
                 </div>
@@ -139,20 +139,20 @@ Run Skill.bat</code></pre>
                     <button class="tab-btn is-active" type="button" data-folder="inbound" aria-pressed="true">
                         1 inbound/ <span class="tab-badge" style="color: var(--orange); text-shadow: 0 0 8px var(--orange);">local</span>
                     </button>
-                    <button class="tab-btn" type="button" data-folder="outbound" aria-pressed="false">
-                        2 outbound/ <span class="tab-badge" style="color: var(--orange); text-shadow: 0 0 8px var(--orange);">local</span>
-                    </button>
-                    <button class="tab-btn" type="button" data-folder="references" aria-pressed="false">
-                        3 references/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
-                    </button>
-                    <button class="tab-btn" type="button" data-folder="templates" aria-pressed="false">
-                        4 templates/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
-                    </button>
                     <button class="tab-btn" type="button" data-folder="harness" aria-pressed="false">
-                        5 harness/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
+                        2 harness/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
                     </button>
                     <button class="tab-btn" type="button" data-folder="skills" aria-pressed="false">
-                        6 skills/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
+                        3 skills/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
+                    </button>
+                    <button class="tab-btn" type="button" data-folder="references" aria-pressed="false">
+                        4 references/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
+                    </button>
+                    <button class="tab-btn" type="button" data-folder="templates" aria-pressed="false">
+                        5 templates/ <span class="tab-badge" style="color: var(--mint); text-shadow: 0 0 8px var(--mint);">shared</span>
+                    </button>
+                    <button class="tab-btn" type="button" data-folder="output" aria-pressed="false">
+                        6 output/ <span class="tab-badge" style="color: var(--orange); text-shadow: 0 0 8px var(--orange);">local</span>
                     </button>
                 </div>
                 <div class="library-panel" id="libraryPanel" aria-live="polite"></div>
