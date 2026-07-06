@@ -114,14 +114,34 @@ Run Skill.bat</code></pre>
                     <button class="primary-action" type="button" id="runPipeline">Run simulation</button>
                 </div>
                 <div class="skill-choice" id="skillChoice" hidden aria-live="polite">
-                    <span>Choose Skill</span>
+                    <span>Choose A Skill</span>
                     <button type="button" class="skill-choice-btn" data-skill="tech">Technical Specs</button>
                     <button type="button" class="skill-choice-btn" data-skill="func">Functional Specs</button>
+                    <button type="button" class="skill-choice-btn" data-skill="create">Create New Skill</button>
                 </div>
                 <div class="selected-skill" id="selectedSkill" hidden aria-live="polite">
-                    <span>Selected skill</span>
+                    <span>Selected skill:</span>
                     <strong>None</strong>
                 </div>
+                <form class="create-skill-form" id="createSkillForm" hidden>
+                    <label>
+                        Skill Name
+                        <input name="skillName" type="text" required placeholder="PeerReviewer">
+                    </label>
+                    <label>
+                        Goal and Functionality
+                        <textarea name="goal" rows="3" required placeholder="Describe what the new skill should help create or transform."></textarea>
+                    </label>
+                    <label>
+                        Expected Input
+                        <textarea name="input" rows="2" required placeholder="Describe the source file, notes, data, or context this skill should expect."></textarea>
+                    </label>
+                    <label>
+                        Expected Output
+                        <textarea name="output" rows="3" required placeholder="Describe the final document, sections, format, or deliverable this skill should produce."></textarea>
+                    </label>
+                    <button type="submit" class="primary-action">Simulate Skill Creation</button>
+                </form>
 
                 <div class="console">
                     <div class="console-header">

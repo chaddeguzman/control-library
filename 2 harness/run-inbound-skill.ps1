@@ -363,6 +363,109 @@ function Test-CodexCli {
     return $null -ne $command
 }
 
+function Read-RequiredInput {
+    param(
+        [string]$Prompt
+    )
+
+    do {
+        $value = Read-Host $Prompt
+        if ([string]::IsNullOrWhiteSpace($value)) {
+            Write-Host "Please enter a value."
+        }
+    } until (-not [string]::IsNullOrWhiteSpace($value))
+
+    return $value.Trim()
+}
+
+function ConvertTo-SafeSkillFileName {
+    param(
+        [string]$Name
+    )
+
+    $safeName = [Regex]::Replace($Name.Trim(), "[^A-Za-z0-9]+", "")
+    if ([string]::IsNullOrWhiteSpace($safeName)) {
+        $safeName = "NewSkill"
+    }
+
+    if (-not $safeName.EndsWith("Skill", [System.StringComparison]::OrdinalIgnoreCase) -and
+        -not $safeName.EndsWith("Gen", [System.StringComparison]::OrdinalIgnoreCase)) {
+        $safeName = "${safeName}Skill"
+    }
+
+    return $safeName
+}
+
+function New-SkillFile {
+    Write-Host ""
+    Write-Host "Create New Skill"
+    Write-Host "Answer the prompts below. The harness will create a new .md file in 3 skills/."
+    Write-Host ""
+
+    $displayName = Read-RequiredInput -Prompt "New skill name"
+    $goal = Read-RequiredInput -Prompt "What should this skill help create or transform?"
+    $audience = Read-RequiredInput -Prompt "Who is the intended audience or user?"
+    $inputExpectation = Read-RequiredInput -Prompt "What source/input should this skill expect?"
+    $outputStructure = Read-RequiredInput -Prompt "What output structure or sections should it produce?"
+    $hardRules = Read-RequiredInput -Prompt "What hard rules should it always follow?"
+    $validationChecks = Read-RequiredInput -Prompt "What validation checks or acceptance criteria should it use?"
+    $topics = Read-RequiredInput -Prompt "Keywords/topics for matching references and templates"
+
+    $safeName = ConvertTo-SafeSkillFileName -Name $displayName
+    $targetPath = Join-Path $SkillsDir "$safeName.md"
+    if (Test-Path -LiteralPath $targetPath) {
+        $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+        $targetPath = Join-Path $SkillsDir "$safeName-$stamp.md"
+    }
+
+    $content = @(
+        "---"
+        "topics: $topics"
+        "applies_to: $safeName"
+        "---"
+        ""
+        "# $safeName"
+        ""
+        "## Purpose"
+        ""
+        $goal
+        ""
+        "## Intended Audience"
+        ""
+        $audience
+        ""
+        "## Expected Input"
+        ""
+        $inputExpectation
+        ""
+        "## Output Structure"
+        ""
+        $outputStructure
+        ""
+        "## Hard Rules"
+        ""
+        $hardRules
+        ""
+        "## Validation Checks"
+        ""
+        $validationChecks
+        ""
+        "## Reference and Template Matching"
+        ""
+        "Use matching reference and template files related to: $topics"
+        ""
+        "## Final Response Requirement"
+        ""
+        "Return only the completed Markdown document. Do not wrap the final answer in code fences. Do not describe the process unless the requested output explicitly asks for process notes."
+    ) -join [Environment]::NewLine
+
+    Set-Content -LiteralPath $targetPath -Value $content -Encoding UTF8
+    Write-Log "Created new skill: $(Get-ProjectRelativePath -Path $targetPath)"
+    Write-Host ""
+    Write-Host "Created skill:"
+    Write-Host (Get-ProjectRelativePath -Path $targetPath)
+}
+
 function Write-SelectedContextLog {
     param(
         [System.IO.FileInfo]$Skill,
@@ -531,6 +634,12 @@ try {
     $skillItem = Get-Item -LiteralPath $SkillPath
     if ($skillItem.Extension -ne ".md") {
         throw "Skill must be a .md file: $SkillPath"
+    }
+
+    if ($skillItem.BaseName -eq "CreateSkill") {
+        Write-Log "Selected utility skill: $($skillItem.FullName)"
+        New-SkillFile
+        exit 0
     }
 
     $pendingFiles = @(

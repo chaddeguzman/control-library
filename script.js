@@ -125,6 +125,7 @@ const consoleDot = document.getElementById("consoleDot");
 const skillChoice = document.getElementById("skillChoice");
 const skillChoiceButtons = document.querySelectorAll(".skill-choice-btn");
 const selectedSkillPanel = document.getElementById("selectedSkill");
+const createSkillForm = document.getElementById("createSkillForm");
 
 const pipelineSteps = pipelineTrack ? Array.from(pipelineTrack.querySelectorAll(".flow-node")) : [];
 const skillOptions = {
@@ -139,6 +140,11 @@ const skillOptions = {
         file: "FuncSpecGen.md",
         template: "Functional spec template",
         output: "functional-spec.md",
+    },
+    create: {
+        label: "Create New Skill",
+        file: "CreateSkill.MD",
+        utility: true,
     },
 };
 
@@ -168,6 +174,59 @@ function moveTokenTo(node) {
 
 function sleep(ms) {
     return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function getSafeSkillFileName(name) {
+    let safeName = String(name || "").trim().replace(/[^A-Za-z0-9]+/g, "");
+    if (!safeName) {
+        safeName = "NewSkill";
+    }
+    return `${safeName}.md`;
+}
+
+function requestCreateSkillDetails() {
+    if (!createSkillForm) {
+        return Promise.resolve({
+            skillName: "NewSkill",
+            goal: "Create a new reusable skill.",
+            input: "User-provided source material.",
+            output: "A structured Markdown document.",
+        });
+    }
+
+    createSkillForm.hidden = false;
+    createSkillForm.reset();
+
+    return new Promise((resolve) => {
+        const handleSubmit = (event) => {
+            event.preventDefault();
+            const formData = new FormData(createSkillForm);
+            createSkillForm.hidden = true;
+            createSkillForm.removeEventListener("submit", handleSubmit);
+            resolve({
+                skillName: String(formData.get("skillName") || "").trim(),
+                goal: String(formData.get("goal") || "").trim(),
+                input: String(formData.get("input") || "").trim(),
+                output: String(formData.get("output") || "").trim(),
+            });
+        };
+
+        createSkillForm.addEventListener("submit", handleSubmit);
+    });
+}
+
+async function runCreateSkillSimulation(selectedSkill) {
+    logLine("Create New Skill wizard started", true);
+    await sleep(420);
+    logLine("Waiting for goal, expected input, and expected output...");
+    const details = await requestCreateSkillDetails();
+    await sleep(420);
+    const skillFileName = getSafeSkillFileName(details.skillName);
+    logLine(`Skill name: ${details.skillName}`);
+    logLine(`Goal/functionality: ${details.goal}`);
+    logLine(`Expected input: ${details.input}`);
+    logLine(`Expected output: ${details.output}`);
+    logLine(`Created skill file in 3 skills/${skillFileName}`, true);
 }
 
 function chooseSkill() {
@@ -211,6 +270,7 @@ async function runPipelineSimulation() {
 
     pipelineSteps.forEach((n) => n.classList.remove("is-active", "is-done"));
     if (skillChoice) skillChoice.hidden = true;
+    if (createSkillForm) createSkillForm.hidden = true;
     if (selectedSkillPanel) {
         selectedSkillPanel.hidden = true;
         const value = selectedSkillPanel.querySelector("strong");
@@ -237,6 +297,12 @@ async function runPipelineSimulation() {
                 selectedSkillPanel.hidden = false;
             }
             logLine(`Selected skill: ${selectedSkill.file}`, true);
+            if (selectedSkill.utility) {
+                await runCreateSkillSimulation(selectedSkill);
+                node.classList.remove("is-active");
+                node.classList.add("is-done");
+                break;
+            }
         }
 
         if (node.dataset.step === "template") {
@@ -254,7 +320,9 @@ async function runPipelineSimulation() {
         pipelineToken.classList.remove("is-live");
     }
 
-    if (selectedSkill) {
+    if (selectedSkill?.utility) {
+        logLine("Create skill simulation complete. No inbound file processed.", true);
+    } else if (selectedSkill) {
         logLine(`Markdown written to 6 output/${selectedSkill.output}`, true);
     }
     logLine("Run complete. Log written to 2 harness/logs/", true);
@@ -304,7 +372,7 @@ const folderData = {
         status: "shared",
         summary: "Shared library instructions describing exactly what kind of document Codex should produce.",
         points: [
-            "Ships with <code>TechSpecGen.md</code> and <code>FuncSpecGen.md</code>.",
+            "Ships with <code>TechSpecGen.md</code>, <code>FuncSpecGen.md</code>, and <code>CreateSkill.MD</code>.",
             "Add a new <code>.md</code> file here and it appears in the <code>Run Skill.bat</code> menu on the next run.",
             "Keep instructions focused on the transformation. Push shared context to <code>4 references/</code> instead.",
         ],

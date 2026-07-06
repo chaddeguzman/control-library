@@ -84,6 +84,7 @@ Supported always-on rule files are `.md`, `.markdown`, and `.txt`.
 | --- | --- |
 | `TechSpecGen.md` | Creates technical specification documents. |
 | `FuncSpecGen.md` | Creates functional specification documents. |
+| `CreateSkill.MD` | Starts an interactive wizard that creates a new `.md` skill in `3 skills/`. |
 
 ## Matching Logic
 
