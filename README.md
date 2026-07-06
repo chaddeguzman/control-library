@@ -2,6 +2,8 @@
 
 Control Library is a local document workflow that applies reusable Codex skills to files dropped into an inbound folder.
 
+Link: https://chaddeguzman.github.io/control-library/
+
 ## Quick Start
 
 1. Put source files in `1 inbound/`.
