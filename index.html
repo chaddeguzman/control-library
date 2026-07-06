@@ -31,6 +31,7 @@
                 <a href="#docs">Quick Start</a>
                 <a href="#workflow">Workflow</a>
                 <a href="#library">Layers</a>
+                <a href="#add-skill">Add Skill</a>
             </div>
         </nav>
     </header>
@@ -86,7 +87,7 @@ Run Skill.bat</code></pre>
                 <article class="step-card">
                     <span class="step-number">4</span>
                     <h3>Review the output</h3>
-                    <p>Find generated Markdown in <code>6 output/</code>; the source moves to <code>1 inbound/Done/</code>.</p>
+                    <p>Find generated Markdown in <code>6&nbsp;output/</code>; the source moves to <code>1&nbsp;inbound/Done/</code>.</p>
                 </article>
             </div>
         </section>
@@ -166,6 +167,36 @@ Run Skill.bat</code></pre>
                     </button>
                 </div>
                 <div class="library-panel" id="libraryPanel" aria-live="polite"></div>
+            </div>
+        </section>
+
+        <section class="section reveal" id="add-skill" aria-labelledby="add-skill-title">
+            <div class="section-heading">
+                <p class="eyebrow">Add Skill</p>
+                <h2 id="add-skill-title">How to add a new skill</h2>
+                <p>Use the <code>CreateSkill</code> skill when the library needs a new reusable document behavior.</p>
+            </div>
+            <div class="steps-grid">
+                <article class="step-card">
+                    <span class="step-number">1</span>
+                    <h3>Run the harness</h3>
+                    <p>Double-click <code>Run Skill.bat</code>, then choose the <code>CreateSkill</code> skill.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-number">2</span>
+                    <h3>Answer the prompts</h3>
+                    <p>Provide the skill name, goal, functionality, expected input, and expected output.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-number">3</span>
+                    <h3>Review the file</h3>
+                    <p>The new Markdown skill is created in <code>3 skills/</code> using your chosen name.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-number">4</span>
+                    <h3>Run it</h3>
+                    <p>Drop a source file into <code>1 inbound/</code>, run the harness, and select the new skill.</p>
+                </article>
             </div>
         </section>
     </main>
