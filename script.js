@@ -134,8 +134,11 @@ const skillOptions = {
     tech: {
         label: "Technical Specs",
         file: "TechSpecGen.md",
-        template: "Tech spec template",
-        output: "technical-spec.md",
+        inboundFile: "1 inbound/ZR_SALES_REPORT.md",
+        fileType: "Reports",
+        fileTypeDescription: "Reports program",
+        template: "Reports Template.md",
+        output: "ZR_SALES_REPORT - tech specs.md",
     },
     func: {
         label: "Functional Specs",
@@ -348,6 +351,10 @@ async function runPipelineSimulation() {
             logLine(node.dataset.log || node.textContent.trim());
         }
 
+        if (i === 0) {
+            logLine(`Inbound file found: ${skillOptions.tech.inboundFile}`, true);
+        }
+
         if (node.dataset.step === "choose-skill") {
             logLine("Waiting for skill selection...");
             selectedSkill = await chooseSkill();
@@ -357,6 +364,9 @@ async function runPipelineSimulation() {
                 selectedSkillPanel.hidden = false;
             }
             logLine(`Selected skill: ${selectedSkill.file}`, true);
+            if (selectedSkill.fileTypeDescription) {
+                logLine(`File Type determined as a "${selectedSkill.fileType}" program`, true);
+            }
             if (selectedSkill.utility) {
                 await runCreateSkillSimulation(selectedSkill);
                 node.classList.remove("is-active");
@@ -368,7 +378,12 @@ async function runPipelineSimulation() {
         if (node.dataset.step === "template") {
             await sleep(280);
             const templateLabel = selectedSkill?.template || "Matching template";
-            logLine(`Matched ${templateLabel}`, true);
+            if (selectedSkill?.fileTypeDescription) {
+                const displayTemplate = templateLabel.replace(/\.md$/i, "");
+                logLine(`${displayTemplate} will be used as the File Type matched as ${selectedSkill.fileType}`, true);
+            } else {
+                logLine(`Matched ${templateLabel}`, true);
+            }
         }
 
         await sleep(650);
@@ -389,7 +404,7 @@ async function runPipelineSimulation() {
     if (consoleDot) consoleDot.classList.remove("is-live");
 
     runButton.disabled = false;
-    runButton.textContent = "Run simulation again";
+    runButton.textContent = "Simulate Again";
 }
 
 if (runButton) {
