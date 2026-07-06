@@ -642,10 +642,13 @@ pre code {
 .create-skill-form {
     display: grid;
     gap: 12px;
-    margin-top: 12px;
+    margin-top: 0;
     padding: 14px;
     border: 1px solid var(--line);
+    border-top: 0;
     border-radius: var(--radius);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     background: var(--bg-raised);
 }
 
@@ -656,14 +659,13 @@ pre code {
 .create-skill-form label {
     display: grid;
     gap: 6px;
-    color: var(--muted);
+    color: var(--orange);
     font-family: var(--font-mono);
     font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
 }
 
-.create-skill-form input,
 .create-skill-form textarea {
     width: 100%;
     border: 1px solid var(--line);
@@ -674,16 +676,11 @@ pre code {
     padding: 10px 12px;
 }
 
-.create-skill-form input {
-    min-height: 42px;
-}
-
 .create-skill-form textarea {
-    min-height: 74px;
-    resize: vertical;
+    height: 92px;
+    resize: none;
 }
 
-.create-skill-form input:focus,
 .create-skill-form textarea:focus {
     border-color: var(--orange);
     outline: none;
@@ -703,6 +700,11 @@ pre code {
     border-radius: var(--radius);
     background: #081724;
     overflow: hidden;
+}
+
+.console:has(+ .create-skill-form:not([hidden])) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .console-header {
@@ -733,8 +735,7 @@ pre code {
 }
 
 .console-output {
-    min-height: 128px;
-    max-height: 220px;
+    height: 220px;
     margin: 0;
     padding: 14px;
     overflow-y: auto;

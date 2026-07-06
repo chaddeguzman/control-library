@@ -126,6 +126,9 @@ const skillChoice = document.getElementById("skillChoice");
 const skillChoiceButtons = document.querySelectorAll(".skill-choice-btn");
 const selectedSkillPanel = document.getElementById("selectedSkill");
 const createSkillForm = document.getElementById("createSkillForm");
+const createSkillQuestion = document.getElementById("createSkillQuestion");
+const createSkillAnswer = document.getElementById("createSkillAnswer");
+const createSkillNext = document.getElementById("createSkillNext");
 
 const pipelineSteps = pipelineTrack ? Array.from(pipelineTrack.querySelectorAll(".flow-node")) : [];
 const skillOptions = {
@@ -189,26 +192,77 @@ function requestCreateSkillDetails() {
         return Promise.resolve({
             skillName: "NewSkill",
             goal: "Create a new reusable skill.",
+            functionality: "Transforms source material into a structured output.",
             input: "User-provided source material.",
             output: "A structured Markdown document.",
         });
     }
 
     createSkillForm.hidden = false;
-    createSkillForm.reset();
+    const questions = [
+        {
+            key: "skillName",
+            label: "Skill Name",
+            placeholder: "Example: PeerReviewer",
+        },
+        {
+            key: "goal",
+            label: "Goal",
+            placeholder: "What should this skill help accomplish?",
+        },
+        {
+            key: "functionality",
+            label: "Functionality",
+            placeholder: "What should this skill do step by step?",
+        },
+        {
+            key: "input",
+            label: "Expected Input",
+            placeholder: "What source file, notes, data, or context should it expect?",
+        },
+        {
+            key: "output",
+            label: "Expected Output",
+            placeholder: "What final document, sections, format, or deliverable should it produce?",
+        },
+    ];
+    const answers = {};
+    let index = 0;
+
+    const showQuestion = () => {
+        const question = questions[index];
+        if (createSkillQuestion) createSkillQuestion.textContent = question.label;
+        if (createSkillAnswer) {
+            createSkillAnswer.value = "";
+            createSkillAnswer.placeholder = question.placeholder;
+            createSkillAnswer.focus();
+        }
+        if (createSkillNext) {
+            createSkillNext.textContent = index === questions.length - 1 ? "Simulate Skill Creation" : "Next";
+        }
+    };
+
+    showQuestion();
 
     return new Promise((resolve) => {
         const handleSubmit = (event) => {
             event.preventDefault();
-            const formData = new FormData(createSkillForm);
+            const question = questions[index];
+            const answer = createSkillAnswer ? createSkillAnswer.value.trim() : "";
+            if (!answer) return;
+
+            answers[question.key] = answer;
+            logLine(`${question.label}: ${answer}`);
+            index += 1;
+
+            if (index < questions.length) {
+                showQuestion();
+                return;
+            }
+
             createSkillForm.hidden = true;
             createSkillForm.removeEventListener("submit", handleSubmit);
-            resolve({
-                skillName: String(formData.get("skillName") || "").trim(),
-                goal: String(formData.get("goal") || "").trim(),
-                input: String(formData.get("input") || "").trim(),
-                output: String(formData.get("output") || "").trim(),
-            });
+            resolve(answers);
         };
 
         createSkillForm.addEventListener("submit", handleSubmit);
@@ -218,14 +272,11 @@ function requestCreateSkillDetails() {
 async function runCreateSkillSimulation(selectedSkill) {
     logLine("Create New Skill wizard started", true);
     await sleep(420);
-    logLine("Waiting for goal, expected input, and expected output...");
+    logLine("Answer each question below the run log.");
     const details = await requestCreateSkillDetails();
     await sleep(420);
     const skillFileName = getSafeSkillFileName(details.skillName);
-    logLine(`Skill name: ${details.skillName}`);
-    logLine(`Goal/functionality: ${details.goal}`);
-    logLine(`Expected input: ${details.input}`);
-    logLine(`Expected output: ${details.output}`);
+    logLine(`Skill functionality captured: ${details.functionality}`);
     logLine(`Created skill file in 3 skills/${skillFileName}`, true);
 }
 
