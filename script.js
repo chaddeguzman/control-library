@@ -122,23 +122,21 @@ const pipelineToken = document.getElementById("pipelineToken");
 const runButton = document.getElementById("runPipeline");
 const consoleOutput = document.getElementById("consoleOutput");
 const consoleDot = document.getElementById("consoleDot");
-const branchCards = document.querySelectorAll(".branch-card");
 const skillChoice = document.getElementById("skillChoice");
 const skillChoiceButtons = document.querySelectorAll(".skill-choice-btn");
+const selectedSkillPanel = document.getElementById("selectedSkill");
 
 const pipelineSteps = pipelineTrack ? Array.from(pipelineTrack.querySelectorAll(".flow-node")) : [];
 const skillOptions = {
     tech: {
         label: "Technical Specs",
         file: "TechSpecGen.md",
-        branch: "tech",
         template: "Tech spec template",
         output: "technical-spec.md",
     },
     func: {
         label: "Functional Specs",
         file: "FuncSpecGen.md",
-        branch: "func",
         template: "Functional spec template",
         output: "functional-spec.md",
     },
@@ -212,9 +210,12 @@ async function runPipelineSimulation() {
     }
 
     pipelineSteps.forEach((n) => n.classList.remove("is-active", "is-done"));
-    branchCards.forEach((b) => b.classList.remove("is-active"));
     if (skillChoice) skillChoice.hidden = true;
-
+    if (selectedSkillPanel) {
+        selectedSkillPanel.hidden = true;
+        const value = selectedSkillPanel.querySelector("strong");
+        if (value) value.textContent = "None";
+    }
     let selectedSkill = null;
 
     for (let i = 0; i < pipelineSteps.length; i += 1) {
@@ -230,18 +231,18 @@ async function runPipelineSimulation() {
         if (node.dataset.step === "choose-skill") {
             logLine("Waiting for skill selection...");
             selectedSkill = await chooseSkill();
+            if (selectedSkillPanel) {
+                const value = selectedSkillPanel.querySelector("strong");
+                if (value) value.textContent = selectedSkill.label;
+                selectedSkillPanel.hidden = false;
+            }
             logLine(`Selected skill: ${selectedSkill.file}`, true);
         }
 
-        if (node.dataset.branch) {
+        if (node.dataset.step === "template") {
             await sleep(280);
-            const branchKey = selectedSkill?.branch || node.dataset.branch;
-            const branch = document.querySelector(`.branch-card[data-branch="${branchKey}"]`);
-            if (branch) {
-                branch.classList.add("is-active");
-                const templateLabel = selectedSkill?.template || branch.textContent.trim();
-                logLine(`Matched ${templateLabel}`, true);
-            }
+            const templateLabel = selectedSkill?.template || "Matching template";
+            logLine(`Matched ${templateLabel}`, true);
         }
 
         await sleep(650);

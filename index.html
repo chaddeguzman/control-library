@@ -104,14 +104,9 @@ Run Skill.bat</code></pre>
                     <div class="flow-node" data-step="choose-skill" data-log="Menu built from 3 skills/">Choose Skill<span>3 skills/</span></div>
                     <div class="flow-node" data-log="Loading hard rules and validation checks">Load Rules<span>2 harness/</span></div>
                     <div class="flow-node" data-log="Scanning 4 references/ for a topic match">Check References<span>4 references/</span></div>
-                    <div class="flow-node" data-branch="tech" data-log="Cross-checking 5 templates/ for structure">Cross-check Template<span>5 templates/</span></div>
+                    <div class="flow-node" data-step="template" data-log="Cross-checking 5 templates/ for selected skill">Cross-check Template<span>5 templates/</span></div>
                     <div class="flow-node" data-skip-log="true">Generate Output<span>6 output/</span></div>
                     <div class="pipeline-token" id="pipelineToken" aria-hidden="true"></div>
-                </div>
-                <div class="flow-branches">
-                    <div class="branch-card" data-branch="tech" data-log="Matched tech spec template">Tech spec template</div>
-                    <div class="branch-card" data-branch="func">Functional spec template</div>
-                    <div class="branch-card" data-branch="other">Other matching template</div>
                 </div>
 
                 <div class="pipeline-controls">
@@ -122,6 +117,10 @@ Run Skill.bat</code></pre>
                     <span>Choose Skill</span>
                     <button type="button" class="skill-choice-btn" data-skill="tech">Technical Specs</button>
                     <button type="button" class="skill-choice-btn" data-skill="func">Functional Specs</button>
+                </div>
+                <div class="selected-skill" id="selectedSkill" hidden aria-live="polite">
+                    <span>Selected skill</span>
+                    <strong>None</strong>
                 </div>
 
                 <div class="console">

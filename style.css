@@ -495,7 +495,7 @@ pre code {
 .pipeline {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
     align-items: stretch;
 }
@@ -562,32 +562,6 @@ pre code {
     opacity: 1;
 }
 
-.flow-branches {
-    margin-top: 16px;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.branch-card {
-    padding: 12px;
-    border: 1px dashed var(--line);
-    border-radius: var(--radius);
-    background: var(--bg-raised);
-    color: var(--muted);
-    text-align: center;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 600;
-    transition: border-color 200ms ease, color 200ms ease;
-}
-
-.branch-card.is-active {
-    border-color: var(--cyan);
-    border-style: solid;
-    color: var(--cyan);
-}
-
 .pipeline-controls {
     display: flex;
     align-items: center;
@@ -640,6 +614,29 @@ pre code {
 
 .skill-choice-btn:disabled {
     cursor: default;
+}
+
+.selected-skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--cyan);
+    border-radius: var(--radius);
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+
+.selected-skill[hidden] {
+    display: none;
+}
+
+.selected-skill span {
+    color: var(--muted);
+    text-transform: uppercase;
 }
 
 .pipeline-hint {
@@ -914,10 +911,6 @@ pre code {
         row-gap: 34px;
     }
 
-    .flow-branches {
-        grid-template-columns: 1fr;
-    }
-
     .library-layout {
         grid-template-columns: 1fr;
     }
@@ -968,8 +961,7 @@ pre code {
     }
 
     .steps-grid,
-    .pipeline,
-    .flow-branches {
+    .pipeline {
         grid-template-columns: 1fr;
     }
 
