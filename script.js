@@ -237,7 +237,7 @@ const folderData = {
     },
     references: {
         label: "3 references/",
-        status: "synced",
+        status: "shared",
         summary: "Shared library guidance a skill can pull in automatically: standards, examples, coding practices, review guidance.",
         points: [
             "Matched by name, first heading, or front matter against the selected skill.",
@@ -247,7 +247,7 @@ const folderData = {
     },
     templates: {
         label: "4 templates/",
-        status: "synced",
+        status: "shared",
         summary: "Shared library structures the skill cross-checks output against before writing the final document.",
         points: [
             "Holds structures for technical specs, functional specs, and other reusable output types.",
@@ -257,7 +257,7 @@ const folderData = {
     },
     harness: {
         label: "5 harness/",
-        status: "synced",
+        status: "shared",
         summary: "The shared library runner that ties source file, skill, references, and template together.",
         points: [
             "<code>run-inbound-skill.ps1</code> is invoked by <code>Run Skill.bat</code>.",
@@ -267,7 +267,7 @@ const folderData = {
     },
     skills: {
         label: "6 skills/",
-        status: "synced",
+        status: "shared",
         summary: "Shared library instructions describing exactly what kind of document Codex should produce.",
         points: [
             "Ships with <code>TechSpecGen.md</code> and <code>FuncSpecGen.md</code>.",
@@ -287,7 +287,7 @@ function renderFolder(key) {
     libraryPanel.innerHTML = `
         <div class="library-panel-header">
             <h3>${data.label}</h3>
-            <span class="status-pill ${data.status}">${data.status === "synced" ? "Shared Library" : "Local only"}</span>
+            <span class="status-pill ${data.status}">${data.status === "shared" ? "Shared Library" : "Local only"}</span>
         </div>
         <p>${data.summary}</p>
         <ul>${data.points.map((point) => `<li>${point}</li>`).join("")}</ul>
