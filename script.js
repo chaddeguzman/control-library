@@ -223,7 +223,9 @@ async function runPipelineSimulation() {
         node.classList.add("is-active");
         moveTokenTo(node);
 
-        logLine(node.dataset.log || node.textContent.trim());
+        if (node.dataset.skipLog !== "true") {
+            logLine(node.dataset.log || node.textContent.trim());
+        }
 
         if (node.dataset.step === "choose-skill") {
             logLine("Waiting for skill selection...");

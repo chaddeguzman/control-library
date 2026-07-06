@@ -99,13 +99,13 @@ Run Skill.bat</code></pre>
 
             <div class="pipeline-wrap">
                 <div class="pipeline" id="pipelineTrack" aria-label="Control Library pipeline diagram">
-                    <div class="flow-node" data-log="Reading source file from 1 inbound/">Source file<span>1 inbound/</span></div>
-                    <div class="flow-node" data-log="Launching 2 harness/run-inbound-skill.ps1">Run harness<span>2 harness/</span></div>
-                    <div class="flow-node" data-step="choose-skill" data-log="Menu built from 3 skills/">Choose skill<span>3 skills/</span></div>
-                    <div class="flow-node" data-log="Loading hard rules and validation checks">Load rules<span>2 harness/</span></div>
-                    <div class="flow-node" data-log="Scanning 4 references/ for a topic match">Load references<span>4 references/</span></div>
-                    <div class="flow-node" data-branch="tech" data-log="Cross-checking 5 templates/ for structure">Cross-check template<span>5 templates/</span></div>
-                    <div class="flow-node" data-log="Markdown written to 6 output/">Generate output<span>6 output/</span></div>
+                    <div class="flow-node" data-log="Reading source file from 1 inbound/">Source File<span>1 inbound/</span></div>
+                    <div class="flow-node" data-log="Launching 2 harness/run-inbound-skill.ps1">Run Harness<span>2 harness/</span></div>
+                    <div class="flow-node" data-step="choose-skill" data-log="Menu built from 3 skills/">Choose Skill<span>3 skills/</span></div>
+                    <div class="flow-node" data-log="Loading hard rules and validation checks">Load Rules<span>2 harness/</span></div>
+                    <div class="flow-node" data-log="Scanning 4 references/ for a topic match">Check References<span>4 references/</span></div>
+                    <div class="flow-node" data-branch="tech" data-log="Cross-checking 5 templates/ for structure">Cross-check Template<span>5 templates/</span></div>
+                    <div class="flow-node" data-skip-log="true">Generate Output<span>6 output/</span></div>
                     <div class="pipeline-token" id="pipelineToken" aria-hidden="true"></div>
                 </div>
                 <div class="flow-branches">
@@ -119,7 +119,7 @@ Run Skill.bat</code></pre>
                     <button class="primary-action" type="button" id="runPipeline">Run simulation</button>
                 </div>
                 <div class="skill-choice" id="skillChoice" hidden aria-live="polite">
-                    <span>Choose skill</span>
+                    <span>Choose Skill</span>
                     <button type="button" class="skill-choice-btn" data-skill="tech">Technical Specs</button>
                     <button type="button" class="skill-choice-btn" data-skill="func">Functional Specs</button>
                 </div>
