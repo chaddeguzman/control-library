@@ -2,7 +2,17 @@
 
 Generate a technical specification Markdown document from the inbound source file.
 
-Create a clear engineering-facing tech spec using this structure:
+Before drafting, identify the inbound object's type from the file name and source content. Examples include Report, Smartform, Interface, Enhancement, Table, Batch Job, Form, Workflow, or other program/object families.
+
+Use the matching Markdown file from `5 templates/` as the baseline when one exists. For example:
+
+- A Reports program should use a Reports template.
+- A Smartform should use a Smartform template.
+- An Interface should use an Interface template.
+
+Follow the matched template's headings, section order, and required fields. Use the inbound file to populate the template, preserve source-specific details, and do not invent unsupported business facts. If a required template section cannot be completed from the source, mark it as `TBD` or capture it under `Open Questions`.
+
+If no matching template exists, create a clear engineering-facing tech spec using this fallback structure:
 
 1. `# Technical Specification: <descriptive title>`
 2. `## Summary`

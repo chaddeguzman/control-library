@@ -88,9 +88,9 @@ Supported always-on rule files are `.md`, `.markdown`, and `.txt`.
 
 ## Matching Logic
 
-The harness uses the selected skill to find related Markdown files in both `4 references/` and `5 templates/`.
+The harness uses the selected skill to find related Markdown files in `4 references/`.
 
-Matching considers file name, first heading, `topics`, `applies_to`, and keyword overlap with the selected skill.
+For `5 templates/`, the harness compares each inbound file name and content against template file names, first headings, `topics`, and `applies_to`. Source-specific template matches are preferred, so a Reports inbound file can select a Reports template while a Smartform inbound file can select a Smartform template. If no source-specific template is found, the harness can fall back to skill-level template matches.
 
 ## Supported Source Files
 

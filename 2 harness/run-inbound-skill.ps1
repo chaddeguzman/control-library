@@ -102,6 +102,12 @@ function ConvertTo-ReferenceKeywords {
                 $_.Length -gt 1 -and
                 -not ($StopWords -contains $_)
             } |
+            ForEach-Object {
+                $_
+                if ($_.EndsWith("s") -and $_.Length -gt 3) {
+                    $_.Substring(0, $_.Length - 1)
+                }
+            } |
             Sort-Object -Unique
     )
 }
@@ -259,6 +265,131 @@ function Get-MatchingReferences {
     }
 
     return $matches
+}
+
+function Get-MatchingTemplates {
+    param(
+        [System.IO.FileInfo]$Skill,
+        [string]$SkillText,
+        [string]$SearchDir,
+        [System.IO.FileInfo]$Source,
+        [string]$SourceText
+    )
+
+    if (-not (Test-Path -LiteralPath $SearchDir)) {
+        return @()
+    }
+
+    $skillHeading = Get-FirstMarkdownHeading -Text $SkillText
+    $skillKeywords = @(
+        ConvertTo-ReferenceKeywords -Text $Skill.BaseName
+        ConvertTo-ReferenceKeywords -Text $skillHeading
+        ConvertTo-ReferenceKeywords -Text $SkillText
+    ) | Sort-Object -Unique
+    $skillKeys = @(
+        ConvertTo-ReferenceKey -Text $Skill.BaseName
+        ConvertTo-ReferenceKey -Text $skillHeading
+    ) | Where-Object { $_ }
+
+    $sourceKeywords = @(
+        ConvertTo-ReferenceKeywords -Text $Source.BaseName
+        ConvertTo-ReferenceKeywords -Text $Source.Name
+        ConvertTo-ReferenceKeywords -Text $SourceText
+    ) | Sort-Object -Unique
+    $sourceKeys = @(
+        ConvertTo-ReferenceKey -Text $Source.BaseName
+        ConvertTo-ReferenceKey -Text $Source.Name
+    ) | Where-Object { $_ }
+
+    $templates = @(
+        Get-ChildItem -LiteralPath $SearchDir -Recurse -File |
+            Where-Object {
+                -not $_.Name.StartsWith(".") -and
+                $_.Name -ne "README.md" -and
+                $ReferenceExtensions -contains $_.Extension.ToLowerInvariant()
+            } |
+            Sort-Object FullName
+    )
+
+    $scoredMatches = @()
+    foreach ($template in $templates) {
+        $templateText = Get-Content -LiteralPath $template.FullName -Raw -Encoding UTF8
+        $metadata = Get-FrontMatter -Text $templateText
+        $templateHeading = Get-FirstMarkdownHeading -Text $templateText
+        $relativeTemplate = Get-ProjectRelativePath -Path $template.FullName
+
+        $appliesTo = ""
+        if ($metadata.ContainsKey("applies_to")) {
+            $appliesTo = $metadata["applies_to"]
+        }
+
+        $topicText = ""
+        if ($metadata.ContainsKey("topics")) {
+            $topicText = $metadata["topics"]
+        }
+
+        $templateKeywords = @(
+            ConvertTo-ReferenceKeywords -Text $template.BaseName
+            ConvertTo-ReferenceKeywords -Text $relativeTemplate
+            ConvertTo-ReferenceKeywords -Text $templateHeading
+            ConvertTo-ReferenceKeywords -Text $topicText
+            ConvertTo-ReferenceKeywords -Text $appliesTo
+        ) | Sort-Object -Unique
+
+        $appliesToKeys = @(
+            Split-ReferenceMetadataList -Text $appliesTo |
+                ForEach-Object { ConvertTo-ReferenceKey -Text $_ }
+        )
+
+        $templateKeys = @(
+            ConvertTo-ReferenceKey -Text $template.BaseName
+            ConvertTo-ReferenceKey -Text $templateHeading
+            $appliesToKeys
+        ) | Where-Object { $_ }
+
+        $sourceOverlap = @($templateKeywords | Where-Object { $sourceKeywords -contains $_ })
+        $skillOverlap = @($templateKeywords | Where-Object { $skillKeywords -contains $_ })
+        $explicitSourceMatch = $false
+        foreach ($sourceKey in $sourceKeys) {
+            if ($templateKeys -contains $sourceKey) {
+                $explicitSourceMatch = $true
+                break
+            }
+        }
+
+        $explicitSkillMatch = $false
+        foreach ($skillKey in $skillKeys) {
+            if ($templateKeys -contains $skillKey) {
+                $explicitSkillMatch = $true
+                break
+            }
+        }
+
+        $score = ($sourceOverlap.Count * 10) + ($skillOverlap.Count * 2)
+        if ($explicitSourceMatch) {
+            $score += 50
+        }
+        if ($explicitSkillMatch) {
+            $score += 10
+        }
+
+        if ($score -gt 0) {
+            $scoredMatches += [PSCustomObject]@{
+                File = $template
+                RelativePath = $relativeTemplate
+                Text = $templateText
+                Score = $score
+                SourceMatch = ($explicitSourceMatch -or $sourceOverlap.Count -gt 0)
+            }
+        }
+    }
+
+    $sourceMatches = @($scoredMatches | Where-Object { $_.SourceMatch })
+    if ($sourceMatches.Count -gt 0) {
+        return @($sourceMatches | Sort-Object @{ Expression = "Score"; Descending = $true }, RelativePath | Select-Object -First 3)
+    }
+
+    return @($scoredMatches | Sort-Object @{ Expression = "Score"; Descending = $true }, RelativePath | Select-Object -First 3)
 }
 
 function Format-ReferenceContext {
@@ -469,13 +600,13 @@ function New-SkillFile {
 function Write-SelectedContextLog {
     param(
         [System.IO.FileInfo]$Skill,
-        [string]$SkillText
+        [string]$SkillText,
+        [array]$Sources = @()
     )
 
     $hardRules = @(Get-AlwaysOnFiles -SearchDir $HardRulesDir)
     $validationChecks = @(Get-AlwaysOnFiles -SearchDir $ValidationChecksDir)
     $matchingReferences = @(Get-MatchingReferences -Skill $Skill -SkillText $SkillText -SearchDir $ReferenceDir)
-    $matchingTemplates = @(Get-MatchingReferences -Skill $Skill -SkillText $SkillText -SearchDir $TemplateDir)
 
     Write-Log "Hard rule files loaded: $($hardRules.Count)"
     foreach ($rule in $hardRules) {
@@ -496,12 +627,21 @@ function Write-SelectedContextLog {
         }
     }
 
-    if ($matchingTemplates.Count -eq 0) {
-        Write-Log "No matching template files found for skill: $($Skill.BaseName)"
+    if ($Sources.Count -eq 0) {
+        Write-Log "No pending source files available for source-specific template matching."
     }
     else {
-        foreach ($template in $matchingTemplates) {
-            Write-Log "Included template for $($Skill.BaseName): $($template.RelativePath)"
+        foreach ($source in $Sources) {
+            $sourceText = Get-Content -LiteralPath $source.FullName -Raw -Encoding UTF8
+            $matchingTemplates = @(Get-MatchingTemplates -Skill $Skill -SkillText $SkillText -SearchDir $TemplateDir -Source $source -SourceText $sourceText)
+            if ($matchingTemplates.Count -eq 0) {
+                Write-Log "No matching template files found for source: $($source.Name)"
+            }
+            else {
+                foreach ($template in $matchingTemplates) {
+                    Write-Log "Included template for $($source.Name): $($template.RelativePath)"
+                }
+            }
         }
     }
 }
@@ -518,7 +658,10 @@ function Invoke-CodexTransform {
     $hardRules = @(Get-AlwaysOnFiles -SearchDir $HardRulesDir)
     $validationChecks = @(Get-AlwaysOnFiles -SearchDir $ValidationChecksDir)
     $matchingReferences = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText -SearchDir $ReferenceDir)
-    $matchingTemplates = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText -SearchDir $TemplateDir)
+    $sourceText = Get-Content -LiteralPath $Source.FullName -Raw -Encoding UTF8
+    $relativeSource = Get-ProjectRelativePath -Path $Source.FullName
+    $relativeOutput = Get-ProjectRelativePath -Path $OutputPath
+    $matchingTemplates = @(Get-MatchingTemplates -Skill $skillItem -SkillText $skillText -SearchDir $TemplateDir -Source $Source -SourceText $sourceText)
     foreach ($rule in $hardRules) {
         Write-Log "Included hard rule: $($rule.RelativePath)"
     }
@@ -534,25 +677,25 @@ function Invoke-CodexTransform {
         }
     }
     if ($matchingTemplates.Count -eq 0) {
-        Write-Log "No matching template files found for skill: $($skillItem.BaseName)"
+        Write-Log "No matching template files found for source: $($Source.Name)"
     }
     else {
         foreach ($template in $matchingTemplates) {
-            Write-Log "Included template for $($skillItem.BaseName): $($template.RelativePath)"
+            Write-Log "Included template for $($Source.Name): $($template.RelativePath)"
         }
     }
     $hardRulesContext = Format-AlwaysOnContext -Files $hardRules -Label "Hard rule file"
     $validationChecksContext = Format-AlwaysOnContext -Files $validationChecks -Label "Validation check file"
     $referenceContext = Format-ReferenceContext -References $matchingReferences -Label "Reference file"
     $templateContext = Format-ReferenceContext -References $matchingTemplates -Label "Template file"
-    $sourceText = Get-Content -LiteralPath $Source.FullName -Raw -Encoding UTF8
-    $relativeSource = Get-ProjectRelativePath -Path $Source.FullName
-    $relativeOutput = Get-ProjectRelativePath -Path $OutputPath
 
     $prompt = @(
         "You are running a local document workflow."
         ""
         "Apply the selected skill to the source file content below."
+        "The template context, when present, is the gold-standard baseline for the output structure."
+        "Follow the matched template headings, section order, and required fields unless the selected skill or hard rules require a stricter format."
+        "Use the source content to fill the template. Do not invent unsupported business facts; place unknowns in an appropriate open questions or assumptions section."
         ""
         "Return only the final Markdown document. Do not wrap it in code fences. Do not describe the process."
         ""
@@ -681,7 +824,7 @@ try {
 
     if ($DryRun) {
         $skillText = Get-Content -LiteralPath $skillItem.FullName -Raw -Encoding UTF8
-        Write-SelectedContextLog -Skill $skillItem -SkillText $skillText
+        Write-SelectedContextLog -Skill $skillItem -SkillText $skillText -Sources $pendingFiles
         Write-Log "Dry run enabled. Codex CLI is not required, no files will be generated, and inbound files will not be moved."
         Write-Log "Pending supported files: $($pendingFiles.Count)"
         foreach ($file in $pendingFiles) {
