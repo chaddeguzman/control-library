@@ -158,7 +158,7 @@ async function runPipelineSimulation() {
     if (!pipelineSteps.length || !runButton) return;
 
     runButton.disabled = true;
-    runButton.textContent = "Running\u2026";
+    runButton.textContent = "Running…";
     if (consoleDot) consoleDot.classList.add("is-live");
 
     if (consoleOutput) {
@@ -228,7 +228,7 @@ const folderData = {
     outbound: {
         label: "2 outbound/",
         status: "local",
-        summary: "Where finished Markdown documents land after a run \u2014 the thing you actually came here for.",
+        summary: "Where finished Markdown documents land after a run, the thing you actually came here for.",
         points: [
             "One generated file per processed source file.",
             "Built from the source file, the chosen skill, matched references, and template guidance.",
@@ -238,17 +238,17 @@ const folderData = {
     references: {
         label: "3 references/",
         status: "synced",
-        summary: "Shared context a skill can pull in automatically: standards, examples, coding practices, review guidance.",
+        summary: "Shared library guidance a skill can pull in automatically: standards, examples, coding practices, review guidance.",
         points: [
             "Matched by name, first heading, or front matter against the selected skill.",
             "Add <code>applies_to</code> to tie a file to one skill, or <code>topics</code> for broader matching.",
-            "This is the right place for durable guidance \u2014 keep skills themselves task-focused.",
+            "This is the right place for durable guidance. Keep skills themselves task-focused.",
         ],
     },
     templates: {
         label: "4 templates/",
         status: "synced",
-        summary: "Gold-standard structures the skill cross-checks output against before writing the final document.",
+        summary: "Shared library structures the skill cross-checks output against before writing the final document.",
         points: [
             "Holds structures for technical specs, functional specs, and other reusable output types.",
             "The harness picks the closest matching template for the document being generated.",
@@ -258,21 +258,21 @@ const folderData = {
     harness: {
         label: "5 harness/",
         status: "synced",
-        summary: "The runner itself \u2014 the script that ties source file, skill, references, and template together.",
+        summary: "The shared library runner that ties source file, skill, references, and template together.",
         points: [
             "<code>run-inbound-skill.ps1</code> is invoked by <code>Run Skill.bat</code>.",
             "Uses <code>codex exec</code>, so the Codex CLI must be installed and authenticated locally.",
-            "<code>5 harness/logs/</code> keeps a record of every run \u2014 logs stay local, the script is shared.",
+            "<code>5 harness/logs/</code> keeps a record of every run. Logs stay local, the script is shared.",
         ],
     },
     skills: {
         label: "6 skills/",
         status: "synced",
-        summary: "Markdown instructions describing exactly what kind of document Codex should produce.",
+        summary: "Shared library instructions describing exactly what kind of document Codex should produce.",
         points: [
             "Ships with <code>TechSpecGen.md</code> and <code>FuncSpecGen.md</code>.",
             "Add a new <code>.md</code> file here and it appears in the <code>Run Skill.bat</code> menu on the next run.",
-            "Keep instructions focused on the transformation \u2014 push shared context to <code>3 references/</code> instead.",
+            "Keep instructions focused on the transformation. Push shared context to <code>3 references/</code> instead.",
         ],
     },
 };
@@ -287,7 +287,7 @@ function renderFolder(key) {
     libraryPanel.innerHTML = `
         <div class="library-panel-header">
             <h3>${data.label}</h3>
-            <span class="status-pill ${data.status}">${data.status === "synced" ? "Synced to GitHub" : "Local only"}</span>
+            <span class="status-pill ${data.status}">${data.status === "synced" ? "Shared Library" : "Local only"}</span>
         </div>
         <p>${data.summary}</p>
         <ul>${data.points.map((point) => `<li>${point}</li>`).join("")}</ul>
