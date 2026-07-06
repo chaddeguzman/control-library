@@ -231,6 +231,7 @@ const folderData = {
         summary: "The shared library runner that ties source file, skill, references, and template together.",
         points: [
             "<code>run-inbound-skill.ps1</code> is invoked by <code>Run Skill.bat</code>.",
+            "After a skill is selected, it loads <code>hard rules/</code> and <code>validation checks/</code>.",
             "Uses <code>codex exec</code>, so the Codex CLI must be installed and authenticated locally.",
             "<code>2 harness/logs/</code> keeps a record of every run. Logs stay local, the script is shared.",
         ],

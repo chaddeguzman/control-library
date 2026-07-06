@@ -11,9 +11,12 @@ $OutboundDir = Join-Path $ProjectRoot "6 output"
 $ReferenceDir = Join-Path $ProjectRoot "4 references"
 $TemplateDir = Join-Path $ProjectRoot "5 templates"
 $SkillsDir = Join-Path $ProjectRoot "3 skills"
+$HardRulesDir = Join-Path $PSScriptRoot "hard rules"
+$ValidationChecksDir = Join-Path $PSScriptRoot "validation checks"
 $LogDir = Join-Path $PSScriptRoot "logs"
 $SupportedExtensions = @(".txt", ".md", ".markdown", ".csv", ".json", ".xml", ".log")
 $ReferenceExtensions = @(".md", ".markdown")
+$AlwaysOnExtensions = @(".md", ".markdown", ".txt")
 $StopWords = @(
     "a", "an", "and", "are", "as", "be", "below", "by", "codex", "content", "create",
     "document", "file", "final", "for", "from", "generate", "how", "if", "in", "into",
@@ -280,6 +283,55 @@ function Format-ReferenceContext {
     return ($blocks -join ([Environment]::NewLine * 2))
 }
 
+function Get-AlwaysOnFiles {
+    param(
+        [string]$SearchDir
+    )
+
+    if (-not (Test-Path -LiteralPath $SearchDir)) {
+        return @()
+    }
+
+    return @(
+        Get-ChildItem -LiteralPath $SearchDir -Recurse -File |
+            Where-Object {
+                -not $_.Name.StartsWith(".") -and
+                $AlwaysOnExtensions -contains $_.Extension.ToLowerInvariant()
+            } |
+            Sort-Object FullName |
+            ForEach-Object {
+                [PSCustomObject]@{
+                    File = $_
+                    RelativePath = Get-ProjectRelativePath -Path $_.FullName
+                    Text = Get-Content -LiteralPath $_.FullName -Raw -Encoding UTF8
+                }
+            }
+    )
+}
+
+function Format-AlwaysOnContext {
+    param(
+        [array]$Files,
+        [string]$Label
+    )
+
+    if ($Files.Count -eq 0) {
+        return "No $Label files were found."
+    }
+
+    $blocks = @()
+    foreach ($file in $Files) {
+        $blocks += @(
+            "${Label}: $($file.RelativePath)"
+            '```markdown'
+            $file.Text
+            '```'
+        ) -join [Environment]::NewLine
+    }
+
+    return ($blocks -join ([Environment]::NewLine * 2))
+}
+
 function Select-Skill {
     $skills = @(Get-ChildItem -LiteralPath $SkillsDir -Filter "*.md" -File | Sort-Object Name)
     if ($skills.Count -eq 0) {
@@ -313,8 +365,16 @@ function Invoke-CodexTransform {
 
     $skillText = Get-Content -LiteralPath $SelectedSkill -Raw -Encoding UTF8
     $skillItem = Get-Item -LiteralPath $SelectedSkill
+    $hardRules = @(Get-AlwaysOnFiles -SearchDir $HardRulesDir)
+    $validationChecks = @(Get-AlwaysOnFiles -SearchDir $ValidationChecksDir)
     $matchingReferences = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText -SearchDir $ReferenceDir)
     $matchingTemplates = @(Get-MatchingReferences -Skill $skillItem -SkillText $skillText -SearchDir $TemplateDir)
+    foreach ($rule in $hardRules) {
+        Write-Log "Included hard rule: $($rule.RelativePath)"
+    }
+    foreach ($check in $validationChecks) {
+        Write-Log "Included validation check: $($check.RelativePath)"
+    }
     if ($matchingReferences.Count -eq 0) {
         Write-Log "No matching reference files found for skill: $($skillItem.BaseName)"
     }
@@ -331,6 +391,8 @@ function Invoke-CodexTransform {
             Write-Log "Included template for $($skillItem.BaseName): $($template.RelativePath)"
         }
     }
+    $hardRulesContext = Format-AlwaysOnContext -Files $hardRules -Label "Hard rule file"
+    $validationChecksContext = Format-AlwaysOnContext -Files $validationChecks -Label "Validation check file"
     $referenceContext = Format-ReferenceContext -References $matchingReferences -Label "Reference file"
     $templateContext = Format-ReferenceContext -References $matchingTemplates -Label "Template file"
     $sourceText = Get-Content -LiteralPath $Source.FullName -Raw -Encoding UTF8
@@ -349,6 +411,14 @@ function Invoke-CodexTransform {
         ""
         "Selected skill instructions:"
         $skillText
+        ""
+        "Hard rules:"
+        "Follow these instructions unless they directly conflict with system or developer instructions."
+        $hardRulesContext
+        ""
+        "Validation checks:"
+        "Before writing the final Markdown document, internally validate the output against these checks."
+        $validationChecksContext
         ""
         "Reference context:"
         $referenceContext
