@@ -1,10 +1,10 @@
 # Control Library
 
-Control Library is a local Codex document workflow.
+Control Library is a skill-agnostic AI documentation pipeline.
 
 Link: https://chaddeguzman.github.io/control-library/
 
-It turns source files from `1 inbound/` into structured Markdown documents in `6 output/` by combining:
+It receives developer requests or source files from `1 inbound/`, classifies the intent, routes the work to the correct registered skill, and returns a structured Markdown document in `6 output/` by combining:
 
 1. The source file
 2. The harness from `2 harness/`
@@ -13,6 +13,13 @@ It turns source files from `1 inbound/` into structured Markdown documents in `6
 5. Matching reference guidance from `4 references/`
 6. Matching template guidance from `5 templates/`
 7. The generated output in `6 output/`
+
+## Core Principles
+
+- **Skill-agnostic pipeline**: the workflow is not tied to one skill, file type, or output type.
+- **Intent-based routing**: inbound content is classified and routed to the registered skill that best fits the request.
+- **Standardized outputs**: skills, references, templates, hard rules, and validation checks work together to keep outputs consistent and repeatable.
+- **Layer independence**: new skills can be added without changing references, templates, hard rules, validation checks, or existing skill behavior.
 
 ## Quick Start
 
