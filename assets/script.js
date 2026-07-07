@@ -136,19 +136,22 @@ const skillOptions = {
         file: "TechSpecGen.md",
         inboundFile: "1 inbound/ZSD_SALESREPORT.txt",
         fileType: "Reports",
-        fileTypeDescription: "Reports program",
+        fileTypeDescription: 'a "Reports" program',
         template: "Reports Template.md",
         output: "ZSD_SALESREPORT - tech specs.md",
     },
     func: {
         label: "Functional Specs",
         file: "FuncSpecGen.md",
-        template: "Functional spec template",
-        output: "functional-spec.md",
+        inboundFile: "1 inbound/ZSD_SALESREPORT_REQUEST.txt",
+        fileType: "Functional Requirement",
+        fileTypeDescription: 'a "Functional Requirement" request',
+        template: "Functional Spec Template.md",
+        output: "ZSD_SALESREPORT - functional specs.md",
     },
     create: {
         label: "Create New Skill",
-        file: "CreateSkill.MD",
+        file: "CreateSkill.md",
         utility: true,
     },
 };
@@ -324,7 +327,7 @@ async function runPipelineSimulation() {
     if (!pipelineSteps.length || !runButton) return;
 
     runButton.disabled = true;
-    runButton.textContent = "Running…";
+    runButton.textContent = "Running...";
     if (consoleDot) consoleDot.classList.add("is-live");
 
     if (consoleOutput) {
@@ -352,7 +355,7 @@ async function runPipelineSimulation() {
         }
 
         if (i === 0) {
-            logLine(`Inbound file found: ${skillOptions.tech.inboundFile}`, true);
+            logLine("Inbound file found in 1 inbound/", true);
         }
 
         if (node.dataset.step === "choose-skill") {
@@ -364,8 +367,11 @@ async function runPipelineSimulation() {
                 selectedSkillPanel.hidden = false;
             }
             logLine(`Selected skill: ${selectedSkill.file}`, true);
+            if (selectedSkill.inboundFile) {
+                logLine(`Active inbound file: ${selectedSkill.inboundFile}`, true);
+            }
             if (selectedSkill.fileTypeDescription) {
-                logLine(`File Type determined as a "${selectedSkill.fileType}" program`, true);
+                logLine(`File Type determined as ${selectedSkill.fileTypeDescription}`, true);
             }
             if (selectedSkill.utility) {
                 await runCreateSkillSimulation(selectedSkill);
@@ -438,7 +444,7 @@ const folderData = {
         points: [
             "<code>run-inbound-skill.ps1</code> is invoked by <code>Run Skill.bat</code>.",
             "After a skill is selected, it loads <code>hard rules/</code> and <code>validation checks/</code>.",
-            "Uses <code>codex exec</code>, so the Codex CLI must be installed and authenticated locally.",
+            "Uses <code>codex exec</code> for normal document generation; <code>CreateSkill</code> and <code>-DryRun</code> can run without Codex CLI.",
             "<code>2 harness/logs/</code> keeps a record of every run. Logs stay local, the script is shared.",
         ],
     },
@@ -447,7 +453,7 @@ const folderData = {
         status: "shared",
         summary: "Shared library instructions describing exactly what kind of document Codex should produce.",
         points: [
-            "Ships with <code>TechSpecGen.md</code>, <code>FuncSpecGen.md</code>, and <code>CreateSkill.MD</code>.",
+            "Ships with <code>TechSpecGen.md</code>, <code>FuncSpecGen.md</code>, and <code>CreateSkill.md</code>.",
             "Add a new <code>.md</code> file here and it appears in the <code>Run Skill.bat</code> menu on the next run.",
             "Keep instructions focused on the transformation. Push shared context to <code>4 references/</code> instead.",
         ],

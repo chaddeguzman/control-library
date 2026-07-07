@@ -91,7 +91,7 @@ Supported always-on rule files are `.md`, `.markdown`, and `.txt`.
 | --- | --- |
 | `TechSpecGen.md` | Creates technical specification documents. |
 | `FuncSpecGen.md` | Creates functional specification documents. |
-| `CreateSkill.MD` | Starts an interactive wizard that creates a new `.md` skill in `3 skills/`. |
+| `CreateSkill.md` | Starts an interactive wizard that creates a new `.md` skill in `3 skills/`. |
 
 ## Matching Logic
 
@@ -107,7 +107,9 @@ Unsupported files stay in `1 inbound/` and are recorded in the run log.
 
 ## Runtime Notes
 
-The runner uses `codex exec`. Codex CLI must be installed and authenticated locally.
+Normal document generation uses `codex exec`, so Codex CLI must be installed and authenticated locally.
+
+The `CreateSkill` utility and dry runs do not require Codex CLI.
 
 To validate the workflow without Codex CLI or output generation, run:
 
