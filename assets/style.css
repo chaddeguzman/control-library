@@ -694,6 +694,21 @@ pre code {
     font-size: 0.78rem;
 }
 
+.prereq-note {
+    margin: -8px 0 28px;
+    padding: 10px 16px;
+    border-left: 2px solid var(--orange);
+    background: var(--orange-dim);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    border-radius: 0 4px 4px 0;
+}
+
+.prereq-note strong {
+    color: var(--orange);
+}
+
 .console {
     margin-top: 16px;
     border: 1px solid var(--line);
