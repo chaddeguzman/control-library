@@ -137,7 +137,7 @@ const skillOptions = {
         inboundFile: "1 inbound/ZSD_SALESREPORT.txt",
         fileType: "Reports",
         fileTypeDescription: 'a "Reports" program',
-        template: "Reports Template.md",
+        template: "object-name-report.md",
         output: "ZSD_SALESREPORT - tech specs.md",
     },
     func: {
