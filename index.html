@@ -3,15 +3,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Control Library: a skill-agnostic AI documentation pipeline that turns source files into structured Markdown documents.">
+    <meta name="description" content="Control Library: a skill-agnostic AI documentation pipeline that turns source files into structured documents.">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Control Library">
-    <meta property="og:description" content="A skill-agnostic Codex document pipeline that turns raw source files into structured Markdown &mdash; entirely on your own machine.">
+    <meta property="og:description" content="A skill-agnostic Codex document pipeline that turns raw source files into structured documents &mdash; entirely on your own machine.">
     <meta property="og:image" content="https://chaddeguzman.github.io/control-library/assets/og-image.png">
     <meta property="og:url" content="https://chaddeguzman.github.io/control-library/">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Control Library">
-    <meta name="twitter:description" content="A skill-agnostic Codex document pipeline that turns raw source files into structured Markdown &mdash; entirely on your own machine.">
+    <meta name="twitter:description" content="A skill-agnostic Codex document pipeline that turns raw source files into structured documents &mdash; entirely on your own machine.">
     <meta name="twitter:image" content="https://chaddeguzman.github.io/control-library/assets/og-image.png">
     <title>Control Library</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -122,12 +122,12 @@ Run Skill.bat</code></pre>
                 <article class="step-card">
                     <span class="step-number">3</span>
                     <h3>Choose a skill</h3>
-                    <p>Select the Markdown skill that describes the transformation you want.</p>
+                    <p>Select the skill that describes the transformation you want.</p>
                 </article>
                 <article class="step-card">
                     <span class="step-number">4</span>
                     <h3>Review the output</h3>
-                    <p>Find generated Markdown in <code>6&nbsp;output/</code>; the source moves to <code>1&nbsp;inbound/Done/</code>.</p>
+                    <p>Find the generated document in <code>6&nbsp;output/</code>; the source moves to <code>1&nbsp;inbound/Done/</code>.</p>
                 </article>
             </div>
         </section>
@@ -161,8 +161,17 @@ Run Skill.bat</code></pre>
                     <button type="button" class="skill-choice-btn" data-skill="func">Functional Specs</button>
                     <button type="button" class="skill-choice-btn" data-skill="create">Create New Skill</button>
                 </div>
+                <div class="skill-choice format-choice" id="formatChoice" hidden aria-live="polite">
+                    <span>Choose Output</span>
+                    <button type="button" class="skill-choice-btn" data-format="md">Markdown .md</button>
+                    <button type="button" class="skill-choice-btn" data-format="doc">Word .doc</button>
+                </div>
                 <div class="selected-skill" id="selectedSkill" hidden aria-live="polite">
                     <span>Selected skill:</span>
+                    <strong>None</strong>
+                </div>
+                <div class="selected-skill selected-output" id="selectedOutput" hidden aria-live="polite">
+                    <span>Selected output:</span>
                     <strong>None</strong>
                 </div>
                 <div class="console">

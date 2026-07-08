@@ -2,9 +2,10 @@
 
 Reusable output templates live here.
 
-Add one Markdown file per baseline document type, such as:
+Add one template file per baseline document type and output format, such as:
 
 - `object-name-report.md`
+- `object-name-report.doc`
 - `Smartform Template.md`
 - `Interface Template.md`
 - `Enhancement Template.md`

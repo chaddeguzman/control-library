@@ -124,7 +124,10 @@ const consoleOutput = document.getElementById("consoleOutput");
 const consoleDot = document.getElementById("consoleDot");
 const skillChoice = document.getElementById("skillChoice");
 const skillChoiceButtons = document.querySelectorAll(".skill-choice-btn");
+const formatChoice = document.getElementById("formatChoice");
+const formatChoiceButtons = document.querySelectorAll("[data-format]");
 const selectedSkillPanel = document.getElementById("selectedSkill");
+const selectedOutputPanel = document.getElementById("selectedOutput");
 const createSkillForm = document.getElementById("createSkillForm");
 const createSkillQuestion = document.getElementById("createSkillQuestion");
 const createSkillAnswer = document.getElementById("createSkillAnswer");
@@ -139,6 +142,20 @@ const skillOptions = {
         fileTypeDescription: 'a "Reports" program',
         template: "object-name-report.md",
         output: "ZSD_SALESREPORT - tech specs.md",
+        outputFormats: {
+            md: {
+                label: "Markdown .md",
+                template: "object-name-report.md",
+                output: "ZSD_SALESREPORT - tech specs.md",
+                logPrefix: "Markdown",
+            },
+            doc: {
+                label: "Word .doc",
+                template: "object-name-report.doc",
+                output: "ZSD_SALESREPORT - tech specs.doc",
+                logPrefix: "DOC",
+            },
+        },
     },
     func: {
         label: "Functional Specs",
@@ -323,6 +340,36 @@ function chooseSkill() {
     });
 }
 
+function chooseOutputFormat(selectedSkill) {
+    if (!selectedSkill?.outputFormats || !formatChoice) {
+        return Promise.resolve(null);
+    }
+
+    formatChoice.hidden = false;
+    formatChoiceButtons.forEach((button) => {
+        button.disabled = false;
+        button.classList.remove("is-selected");
+    });
+
+    return new Promise((resolve) => {
+        const handleChoice = (event) => {
+            const button = event.currentTarget;
+            const selected = selectedSkill.outputFormats[button.dataset.format] || selectedSkill.outputFormats.md;
+            formatChoiceButtons.forEach((btn) => {
+                btn.disabled = true;
+                btn.classList.toggle("is-selected", btn === button);
+            });
+            window.setTimeout(() => {
+                formatChoice.hidden = true;
+                formatChoiceButtons.forEach((btn) => btn.removeEventListener("click", handleChoice));
+                resolve(selected);
+            }, 260);
+        };
+
+        formatChoiceButtons.forEach((button) => button.addEventListener("click", handleChoice));
+    });
+}
+
 async function runPipelineSimulation() {
     if (!pipelineSteps.length || !runButton) return;
 
@@ -336,13 +383,20 @@ async function runPipelineSimulation() {
 
     pipelineSteps.forEach((n) => n.classList.remove("is-active", "is-done"));
     if (skillChoice) skillChoice.hidden = true;
+    if (formatChoice) formatChoice.hidden = true;
     if (createSkillForm) createSkillForm.hidden = true;
     if (selectedSkillPanel) {
         selectedSkillPanel.hidden = true;
         const value = selectedSkillPanel.querySelector("strong");
         if (value) value.textContent = "None";
     }
+    if (selectedOutputPanel) {
+        selectedOutputPanel.hidden = true;
+        const value = selectedOutputPanel.querySelector("strong");
+        if (value) value.textContent = "None";
+    }
     let selectedSkill = null;
+    let selectedFormat = null;
 
     for (let i = 0; i < pipelineSteps.length; i += 1) {
         const node = pipelineSteps[i];
@@ -373,6 +427,15 @@ async function runPipelineSimulation() {
             if (selectedSkill.fileTypeDescription) {
                 logLine(`File Type determined as ${selectedSkill.fileTypeDescription}`, true);
             }
+            selectedFormat = await chooseOutputFormat(selectedSkill);
+            if (selectedFormat) {
+                if (selectedOutputPanel) {
+                    const value = selectedOutputPanel.querySelector("strong");
+                    if (value) value.textContent = selectedFormat.label;
+                    selectedOutputPanel.hidden = false;
+                }
+                logLine(`Selected output format: ${selectedFormat.label}`, true);
+            }
             if (selectedSkill.utility) {
                 await runCreateSkillSimulation(selectedSkill);
                 node.classList.remove("is-active");
@@ -383,12 +446,11 @@ async function runPipelineSimulation() {
 
         if (node.dataset.step === "template") {
             await sleep(280);
-            const templateLabel = selectedSkill?.template || "Matching template";
+            const templateLabel = selectedFormat?.template || selectedSkill?.template || "Matching template";
             if (selectedSkill?.fileTypeDescription) {
-                const displayTemplate = templateLabel.replace(/\.md$/i, "");
-                logLine(`${displayTemplate} will be used as the File Type matched as ${selectedSkill.fileType}`, true);
+                logLine(`${templateLabel} was found and will be used as the File Type matched as ${selectedSkill.fileType}`, true);
             } else {
-                logLine(`Matched ${templateLabel}`, true);
+                logLine(`${templateLabel} was found and will be used`, true);
             }
         }
 
@@ -404,7 +466,9 @@ async function runPipelineSimulation() {
     if (selectedSkill?.utility) {
         logLine("Create skill simulation complete. No inbound file processed.", true);
     } else if (selectedSkill) {
-        logLine(`Markdown written to 6 output/${selectedSkill.output}`, true);
+        const output = selectedFormat?.output || selectedSkill.output;
+        const logPrefix = selectedFormat?.logPrefix || "Markdown";
+        logLine(`${logPrefix} written to 6 output/${output}`, true);
     }
     logLine("Run complete. Log written to 2 harness/logs/", true);
     if (consoleDot) consoleDot.classList.remove("is-live");
@@ -481,9 +545,9 @@ const folderData = {
     output: {
         label: "6 output/",
         status: "local",
-        summary: "Where finished Markdown documents land after a run, the thing you actually came here for.",
+        summary: "Where finished documents land after a run, the thing you actually came here for.",
         points: [
-            "One generated file per processed source file.",
+            "One generated file per processed source file, such as Markdown or DOC output.",
             "Built from the source file, the chosen skill, matched references, and template guidance.",
             "Not committed to GitHub; treated as local output only.",
         ],
