@@ -26,9 +26,10 @@ It receives developer requests or source files from `1 inbound/`, classifies the
 1. Put a supported source file in `1 inbound/`.
 2. Double click `Run Skill.bat`.
 3. Choose a skill from the menu.
-4. Review the generated Markdown file in `6 output/`.
-5. Check `1 inbound/Done/` for the processed original file.
-6. Check `2 harness/logs/` for run details.
+4. If you choose `TechSpecGen.md`, choose Markdown `.md` or Word-compatible `.doc` output.
+5. Review the generated file in `6 output/`.
+6. Check `1 inbound/Done/` for the processed original file.
+7. Check `2 harness/logs/` for run details.
 
 ## Master Workflow
 
@@ -115,6 +116,12 @@ To validate the workflow without Codex CLI or output generation, run:
 
 ```powershell
 .\Run Skill.bat -DryRun
+```
+
+To choose a TechSpecGen output format without using the prompt, pass `-OutputFormat md` or `-OutputFormat doc`:
+
+```powershell
+.\Run Skill.bat -SkillPath "3 skills\TechSpecGen.md" -OutputFormat doc
 ```
 
 Dry run checks the selected skill, always-on rules, validation checks, matching references, matching templates, and pending inbound files without creating output or moving source files.

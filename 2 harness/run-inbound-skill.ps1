@@ -1,5 +1,7 @@
 param(
     [string]$SkillPath,
+    [ValidateSet("md", "doc")]
+    [string]$OutputFormat,
     [switch]$DryRun
 )
 
@@ -17,6 +19,7 @@ $ValidationChecksDir = Join-Path $PSScriptRoot "validation checks"
 $LogDir = Join-Path $PSScriptRoot "logs"
 $SupportedExtensions = @(".txt", ".md", ".markdown", ".csv", ".json", ".xml", ".log")
 $ReferenceExtensions = @(".md", ".markdown")
+$TemplateExtensions = @(".md", ".markdown", ".doc")
 $AlwaysOnExtensions = @(".md", ".markdown", ".txt")
 $StopWords = @(
     "a", "an", "and", "are", "as", "be", "below", "by", "codex", "content", "create",
@@ -38,12 +41,25 @@ function Write-Log {
     Write-Host $line
 }
 
+function Write-StepLog {
+    param(
+        [string]$Step,
+        [string]$Message
+    )
+
+    Write-Log "$Step - $Message"
+}
+
 function Get-SafeOutputPath {
     param(
-        [string]$SourceFile
+        [string]$SourceFile,
+        [string]$OutputExtension = ".md"
     )
 
     $stem = [System.IO.Path]::GetFileNameWithoutExtension($SourceFile)
+    if (-not $OutputExtension.StartsWith(".")) {
+        $OutputExtension = ".$OutputExtension"
+    }
     $invalidPattern = "[{0}]" -f [Regex]::Escape((-join [System.IO.Path]::GetInvalidFileNameChars()))
     $stem = [Regex]::Replace($stem, $invalidPattern, "_")
 
@@ -51,13 +67,13 @@ function Get-SafeOutputPath {
         $stem = "output"
     }
 
-    $candidate = Join-Path $OutboundDir "$stem.md"
+    $candidate = Join-Path $OutboundDir "$stem$OutputExtension"
     if (-not (Test-Path -LiteralPath $candidate)) {
         return $candidate
     }
 
     $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    return (Join-Path $OutboundDir "$stem-$stamp.md")
+    return (Join-Path $OutboundDir "$stem-$stamp$OutputExtension")
 }
 
 function Get-ProjectRelativePath {
@@ -273,7 +289,8 @@ function Get-MatchingTemplates {
         [string]$SkillText,
         [string]$SearchDir,
         [System.IO.FileInfo]$Source,
-        [string]$SourceText
+        [string]$SourceText,
+        [string]$OutputFormat = "md"
     )
 
     if (-not (Test-Path -LiteralPath $SearchDir)) {
@@ -301,19 +318,49 @@ function Get-MatchingTemplates {
         ConvertTo-ReferenceKey -Text $Source.Name
     ) | Where-Object { $_ }
 
+    $allowedTemplateExtensions = @(".md", ".markdown")
+    if ($OutputFormat -eq "doc") {
+        $allowedTemplateExtensions = @(".doc")
+    }
+
     $templates = @(
         Get-ChildItem -LiteralPath $SearchDir -Recurse -File |
             Where-Object {
                 -not $_.Name.StartsWith(".") -and
                 $_.Name -ne "README.md" -and
-                $ReferenceExtensions -contains $_.Extension.ToLowerInvariant()
+                $TemplateExtensions -contains $_.Extension.ToLowerInvariant() -and
+                $allowedTemplateExtensions -contains $_.Extension.ToLowerInvariant()
             } |
             Sort-Object FullName
     )
 
     $scoredMatches = @()
     foreach ($template in $templates) {
-        $templateText = Get-Content -LiteralPath $template.FullName -Raw -Encoding UTF8
+        $isBinaryTemplate = $template.Extension.ToLowerInvariant() -eq ".doc"
+        if ($isBinaryTemplate) {
+            $templateText = @(
+                "Binary Word template selected. Use this file as the baseline document format: $(Get-ProjectRelativePath -Path $template.FullName)"
+                ""
+                "The binary .doc file cannot be read as plain text by this harness."
+                "The required document structure, headings, tables, labels, and placeholders must therefore be taken from the companion Markdown template below when it exists."
+            ) -join [Environment]::NewLine
+
+            $companionMarkdownPath = Join-Path $template.DirectoryName "$($template.BaseName).md"
+            if (Test-Path -LiteralPath $companionMarkdownPath) {
+                $companionText = Get-Content -LiteralPath $companionMarkdownPath -Raw -Encoding UTF8
+                $templateText = @(
+                    $templateText
+                    ""
+                    "Companion structural template: $(Get-ProjectRelativePath -Path $companionMarkdownPath)"
+                    '```markdown'
+                    $companionText
+                    '```'
+                ) -join [Environment]::NewLine
+            }
+        }
+        else {
+            $templateText = Get-Content -LiteralPath $template.FullName -Raw -Encoding UTF8
+        }
         $metadata = Get-FrontMatter -Text $templateText
         $templateHeading = Get-FirstMarkdownHeading -Text $templateText
         $relativeTemplate = Get-ProjectRelativePath -Path $template.FullName
@@ -489,6 +536,117 @@ function Select-Skill {
     return $skills[$parsed - 1].FullName
 }
 
+function Select-OutputFormat {
+    param(
+        [System.IO.FileInfo]$Skill
+    )
+
+    if ($Skill.BaseName -ne "TechSpecGen") {
+        return "md"
+    }
+
+    Write-Host ""
+    Write-Host "Available output formats for TechSpecGen:"
+    Write-Host "  1. Markdown (.md)"
+    Write-Host "  2. Word document (.doc)"
+
+    do {
+        $choice = Read-Host "Select an output format number"
+        $parsed = 0
+        $valid = [int]::TryParse($choice, [ref]$parsed) -and $parsed -ge 1 -and $parsed -le 2
+        if (-not $valid) {
+            Write-Host "Enter 1 for Markdown or 2 for Word document."
+        }
+    } until ($valid)
+
+    if ($parsed -eq 2) {
+        return "doc"
+    }
+
+    return "md"
+}
+
+function Get-OutputExtension {
+    param(
+        [string]$Format
+    )
+
+    if ($Format -eq "doc") {
+        return ".doc"
+    }
+
+    return ".md"
+}
+
+function Confirm-CreateOutput {
+    param(
+        [string]$SourceName,
+        [string]$OutputPath
+    )
+
+    $relativeOutput = Get-ProjectRelativePath -Path $OutputPath
+    do {
+        $answer = Read-Host "Validation passed for '$SourceName'. Would you like to create the document output now at '$relativeOutput'? (Y/N)"
+        $normalized = $answer.Trim().ToLowerInvariant()
+        if ($normalized -in @("y", "yes")) {
+            return $true
+        }
+        if ($normalized -in @("n", "no")) {
+            return $false
+        }
+        Write-Host "Enter Y for yes or N for no."
+    } until ($false)
+}
+
+function ConvertTo-RtfText {
+    param(
+        [string]$Text
+    )
+
+    $escaped = $Text.Replace("\", "\\").Replace("{", "\{").Replace("}", "\}")
+    $escaped = $escaped -replace "`r`n|`n|`r", "\par`r`n"
+
+    return "{\rtf1\ansi`r`n$escaped`r`n}"
+}
+
+function Invoke-CodexExecWithProgress {
+    param(
+        [string]$Prompt,
+        [array]$CodexArgs,
+        [string]$Activity = "Generating output file"
+    )
+
+    $job = Start-Job -ScriptBlock {
+        param(
+            [string]$PromptText,
+            [object[]]$ArgsList
+        )
+
+        $commandOutput = $PromptText | & codex @ArgsList 2>&1
+        [PSCustomObject]@{
+            ExitCode = $LASTEXITCODE
+            Output = ($commandOutput | Out-String)
+        }
+    } -ArgumentList $Prompt, $CodexArgs
+
+    $percent = 5
+    while ($job.State -eq "Running") {
+        if ($percent -lt 95) {
+            $percent = [Math]::Min(95, $percent + 3)
+        }
+
+        Write-Progress -Activity $Activity -Status "Codex is generating the output... $percent%" -PercentComplete $percent
+        Start-Sleep -Milliseconds 800
+    }
+
+    Write-Progress -Activity $Activity -Status "Finalizing output file... 100%" -PercentComplete 100
+    $result = Receive-Job -Job $job
+    Remove-Job -Job $job -Force
+    Write-Progress -Activity $Activity -Completed
+
+    return $result
+}
+
 function Test-CodexCli {
     $command = Get-Command codex -ErrorAction SilentlyContinue
     return $null -ne $command
@@ -601,48 +759,48 @@ function Write-SelectedContextLog {
     param(
         [System.IO.FileInfo]$Skill,
         [string]$SkillText,
-        [array]$Sources = @()
+        [array]$Sources = @(),
+        [string]$OutputFormat = "md",
+        [string]$OutputExtension = ".md"
     )
 
     $hardRules = @(Get-AlwaysOnFiles -SearchDir $HardRulesDir)
     $validationChecks = @(Get-AlwaysOnFiles -SearchDir $ValidationChecksDir)
     $matchingReferences = @(Get-MatchingReferences -Skill $Skill -SkillText $SkillText -SearchDir $ReferenceDir)
 
-    Write-Log "Hard rule files loaded: $($hardRules.Count)"
+    Write-StepLog "Step 1" "Harness loaded selected skill: $($Skill.Name)"
+    Write-StepLog "Step 2" "Hard rules loaded: $($hardRules.Count)"
     foreach ($rule in $hardRules) {
-        Write-Log "Included hard rule: $($rule.RelativePath)"
+        Write-StepLog "Step 2" "Hard rule used: $($rule.RelativePath)"
     }
 
-    Write-Log "Validation check files loaded: $($validationChecks.Count)"
+    Write-StepLog "Step 3" "Validation checks loaded: $($validationChecks.Count)"
     foreach ($check in $validationChecks) {
-        Write-Log "Included validation check: $($check.RelativePath)"
+        Write-StepLog "Step 3" "Validation check used: $($check.RelativePath)"
     }
 
     if ($matchingReferences.Count -eq 0) {
-        Write-Log "No matching reference files found for skill: $($Skill.BaseName)"
+        Write-StepLog "Step 4" "No matching reference files found for skill: $($Skill.BaseName)"
     }
     else {
         foreach ($reference in $matchingReferences) {
-            Write-Log "Included reference for $($Skill.BaseName): $($reference.RelativePath)"
+            Write-StepLog "Step 4" "Reference used for $($Skill.BaseName): $($reference.RelativePath)"
         }
     }
 
-    if ($Sources.Count -eq 0) {
-        Write-Log "No pending source files available for source-specific template matching."
-    }
-    else {
-        foreach ($source in $Sources) {
-            $sourceText = Get-Content -LiteralPath $source.FullName -Raw -Encoding UTF8
-            $matchingTemplates = @(Get-MatchingTemplates -Skill $Skill -SkillText $SkillText -SearchDir $TemplateDir -Source $source -SourceText $sourceText)
-            if ($matchingTemplates.Count -eq 0) {
-                Write-Log "No matching template files found for source: $($source.Name)"
-            }
-            else {
-                foreach ($template in $matchingTemplates) {
-                    Write-Log "Included template for $($source.Name): $($template.RelativePath)"
-                }
+    foreach ($source in $Sources) {
+        $sourceText = Get-Content -LiteralPath $source.FullName -Raw -Encoding UTF8
+        $matchingTemplates = @(Get-MatchingTemplates -Skill $Skill -SkillText $SkillText -SearchDir $TemplateDir -Source $source -SourceText $sourceText -OutputFormat $OutputFormat)
+        if ($matchingTemplates.Count -eq 0) {
+            Write-StepLog "Step 5" "No matching template files found for source: $($source.Name)"
+        }
+        else {
+            foreach ($template in $matchingTemplates) {
+                Write-StepLog "Step 5" "Template used for $($source.Name): $($template.RelativePath)"
             }
         }
+        $previewOutputPath = Get-SafeOutputPath -SourceFile $source.Name -OutputExtension $OutputExtension
+        Write-StepLog "Step 6" "Output destination: $(Get-ProjectRelativePath -Path $previewOutputPath)"
     }
 }
 
@@ -650,7 +808,8 @@ function Invoke-CodexTransform {
     param(
         [System.IO.FileInfo]$Source,
         [string]$SelectedSkill,
-        [string]$OutputPath
+        [string]$OutputPath,
+        [string]$OutputFormat = "md"
     )
 
     $skillText = Get-Content -LiteralPath $SelectedSkill -Raw -Encoding UTF8
@@ -661,43 +820,61 @@ function Invoke-CodexTransform {
     $sourceText = Get-Content -LiteralPath $Source.FullName -Raw -Encoding UTF8
     $relativeSource = Get-ProjectRelativePath -Path $Source.FullName
     $relativeOutput = Get-ProjectRelativePath -Path $OutputPath
-    $matchingTemplates = @(Get-MatchingTemplates -Skill $skillItem -SkillText $skillText -SearchDir $TemplateDir -Source $Source -SourceText $sourceText)
+    $matchingTemplates = @(Get-MatchingTemplates -Skill $skillItem -SkillText $skillText -SearchDir $TemplateDir -Source $Source -SourceText $sourceText -OutputFormat $OutputFormat)
+    Write-StepLog "Step 1" "Harness loaded selected skill: $($skillItem.Name)"
     foreach ($rule in $hardRules) {
-        Write-Log "Included hard rule: $($rule.RelativePath)"
+        Write-StepLog "Step 2" "Hard rule used: $($rule.RelativePath)"
+    }
+    if ($hardRules.Count -eq 0) {
+        Write-StepLog "Step 2" "Hard rules loaded: 0"
     }
     foreach ($check in $validationChecks) {
-        Write-Log "Included validation check: $($check.RelativePath)"
+        Write-StepLog "Step 3" "Validation check used: $($check.RelativePath)"
+    }
+    if ($validationChecks.Count -eq 0) {
+        Write-StepLog "Step 3" "Validation checks loaded: 0"
     }
     if ($matchingReferences.Count -eq 0) {
-        Write-Log "No matching reference files found for skill: $($skillItem.BaseName)"
+        Write-StepLog "Step 4" "No matching reference files found for skill: $($skillItem.BaseName)"
     }
     else {
         foreach ($reference in $matchingReferences) {
-            Write-Log "Included reference for $($skillItem.BaseName): $($reference.RelativePath)"
+            Write-StepLog "Step 4" "Reference used for $($skillItem.BaseName): $($reference.RelativePath)"
         }
     }
     if ($matchingTemplates.Count -eq 0) {
-        Write-Log "No matching template files found for source: $($Source.Name)"
+        Write-StepLog "Step 5" "No matching template files found for source: $($Source.Name)"
     }
     else {
         foreach ($template in $matchingTemplates) {
-            Write-Log "Included template for $($Source.Name): $($template.RelativePath)"
+            Write-StepLog "Step 5" "Template used for $($Source.Name): $($template.RelativePath)"
         }
     }
+    Write-StepLog "Step 6" "Output destination: $relativeOutput"
     $hardRulesContext = Format-AlwaysOnContext -Files $hardRules -Label "Hard rule file"
     $validationChecksContext = Format-AlwaysOnContext -Files $validationChecks -Label "Validation check file"
     $referenceContext = Format-ReferenceContext -References $matchingReferences -Label "Reference file"
     $templateContext = Format-ReferenceContext -References $matchingTemplates -Label "Template file"
 
+    $formatInstruction = "Return only the final Markdown document. Do not wrap it in code fences. Do not describe the process."
+    $validationInstruction = "Before writing the final Markdown document, internally validate the output against these checks."
+    if ($OutputFormat -eq "doc") {
+        $formatInstruction = "Return only valid Rich Text Format content for a Word-compatible .doc file. Start the response with {\rtf1. Do not wrap it in code fences. Do not describe the process."
+        $validationInstruction = "Before writing the final DOC-compatible content, internally validate the output against these checks."
+    }
+
     $prompt = @(
         "You are running a local document workflow."
         ""
         "Apply the selected skill to the source file content below."
-        "The template context, when present, is the gold-standard baseline for the output structure."
-        "Follow the matched template headings, section order, and required fields unless the selected skill or hard rules require a stricter format."
-        "Use the source content to fill the template. Do not invent unsupported business facts; place unknowns in an appropriate open questions or assumptions section."
+        "NON-NEGOTIABLE TEMPLATE RULES:"
+        "1. If template context is present, it is mandatory and must be followed without fail."
+        "2. Preserve the matched template design, title pattern, heading hierarchy, section order, table structures, column names, field labels, placeholders, and required attributes."
+        "3. Do not replace the template with your own structure. Do not use the selected skill's fallback structure when a template is present."
+        "4. Use the source content only to fill the template. If a template field cannot be completed from the source, keep the field and mark it as TBD or use the template's placeholder guidance."
+        "5. Do not invent unsupported business facts; place uncertainty in the closest matching template section."
         ""
-        "Return only the final Markdown document. Do not wrap it in code fences. Do not describe the process."
+        $formatInstruction
         ""
         "Selected skill file:"
         $SelectedSkill
@@ -710,7 +887,7 @@ function Invoke-CodexTransform {
         $hardRulesContext
         ""
         "Validation checks:"
-        "Before writing the final Markdown document, internally validate the output against these checks."
+        $validationInstruction
         $validationChecksContext
         ""
         "Reference context:"
@@ -736,6 +913,7 @@ function Invoke-CodexTransform {
         "--skip-git-repo-check",
         "--ephemeral",
         "--color", "never",
+        "--sandbox", "workspace-write",
         "-C", $ProjectRoot,
         "-o", $OutputPath,
         "-"
@@ -744,8 +922,11 @@ function Invoke-CodexTransform {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        $codexConsoleOutput = $prompt | & codex @codexArgs 2>&1
-        $codexExitCode = $LASTEXITCODE
+        Write-Log "Generation started for $(Get-ProjectRelativePath -Path $OutputPath)"
+        $codexResult = Invoke-CodexExecWithProgress -Prompt $prompt -CodexArgs $codexArgs -Activity "Generating $([System.IO.Path]::GetFileName($OutputPath))"
+        $codexExitCode = $codexResult.ExitCode
+        $codexConsoleOutput = $codexResult.Output
+        Write-Log "Generation finished with exit code $codexExitCode"
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
@@ -754,6 +935,18 @@ function Invoke-CodexTransform {
     if ($codexExitCode -ne 0 -and $codexConsoleOutput) {
         Add-Content -LiteralPath $script:LogPath -Value "Codex console output:" -Encoding UTF8
         $codexConsoleOutput | Add-Content -LiteralPath $script:LogPath -Encoding UTF8
+    }
+
+    if ($codexExitCode -eq 0 -and -not (Test-Path -LiteralPath $OutputPath)) {
+        $fallbackOutput = ($codexConsoleOutput | Out-String).Trim()
+        if (-not [string]::IsNullOrWhiteSpace($fallbackOutput)) {
+            if ($OutputFormat -eq "doc" -and -not $fallbackOutput.TrimStart().StartsWith("{\rtf1")) {
+                $fallbackOutput = ConvertTo-RtfText -Text $fallbackOutput
+            }
+
+            Set-Content -LiteralPath $OutputPath -Value $fallbackOutput -Encoding UTF8
+            Write-Log "Codex did not create the output file directly; wrote captured response to $(Get-ProjectRelativePath -Path $OutputPath)"
+        }
     }
 
     return $codexExitCode
@@ -785,6 +978,16 @@ try {
         exit 0
     }
 
+    if ([string]::IsNullOrWhiteSpace($OutputFormat)) {
+        $OutputFormat = Select-OutputFormat -Skill $skillItem
+    }
+    elseif ($skillItem.BaseName -ne "TechSpecGen" -and $OutputFormat -eq "doc") {
+        Write-Log "DOC output is only available for TechSpecGen. Falling back to Markdown output." "WARN"
+        $OutputFormat = "md"
+    }
+
+    $outputExtension = Get-OutputExtension -Format $OutputFormat
+
     $pendingFiles = @(
         Get-ChildItem -LiteralPath $InboundDir -File |
             Where-Object {
@@ -796,14 +999,13 @@ try {
     )
 
     Write-Log "Selected skill: $($skillItem.FullName)"
+    Write-Log "Selected output format: $OutputFormat"
     Write-Log "Inbound folder: $InboundDir"
     Write-Log "Output folder: $OutboundDir"
 
     if ($pendingFiles.Count -eq 0) {
-        Write-Log "No pending supported files found."
-        if (-not $DryRun) {
-            exit 0
-        }
+        Write-Log "No inbound file found. Put a supported source file in '1 inbound/' and run again."
+        exit 0
     }
 
     $successCount = 0
@@ -824,11 +1026,11 @@ try {
 
     if ($DryRun) {
         $skillText = Get-Content -LiteralPath $skillItem.FullName -Raw -Encoding UTF8
-        Write-SelectedContextLog -Skill $skillItem -SkillText $skillText -Sources $pendingFiles
+        Write-SelectedContextLog -Skill $skillItem -SkillText $skillText -Sources $pendingFiles -OutputFormat $OutputFormat -OutputExtension $outputExtension
         Write-Log "Dry run enabled. Codex CLI is not required, no files will be generated, and inbound files will not be moved."
         Write-Log "Pending supported files: $($pendingFiles.Count)"
         foreach ($file in $pendingFiles) {
-            $previewOutputPath = Get-SafeOutputPath -SourceFile $file.Name
+            $previewOutputPath = Get-SafeOutputPath -SourceFile $file.Name -OutputExtension $outputExtension
             Write-Log "Would process: $($file.Name) -> $([System.IO.Path]::GetFileName($previewOutputPath))"
         }
         Write-Log "Dry run complete."
@@ -840,11 +1042,21 @@ try {
     }
 
     foreach ($file in $pendingFiles) {
-        $outputPath = Get-SafeOutputPath -SourceFile $file.Name
-        Write-Log "Processing: $($file.Name)"
+        $outputPath = Get-SafeOutputPath -SourceFile $file.Name -OutputExtension $outputExtension
+        Write-Log "Inbound file found: $($file.Name)"
+        Write-Log "Processing with output format: $OutputFormat"
 
         try {
-            $exitCode = Invoke-CodexTransform -Source $file -SelectedSkill $skillItem.FullName -OutputPath $outputPath
+            $skillText = Get-Content -LiteralPath $skillItem.FullName -Raw -Encoding UTF8
+            Write-SelectedContextLog -Skill $skillItem -SkillText $skillText -Sources @($file) -OutputFormat $OutputFormat -OutputExtension $outputExtension
+            Write-Log "Validation checks completed before generation."
+
+            if (-not (Confirm-CreateOutput -SourceName $file.Name -OutputPath $outputPath)) {
+                Write-Log "User chose not to create output for $($file.Name). Source file was left in place."
+                continue
+            }
+
+            $exitCode = Invoke-CodexTransform -Source $file -SelectedSkill $skillItem.FullName -OutputPath $outputPath -OutputFormat $OutputFormat
             if ($exitCode -ne 0) {
                 throw "Codex exited with code $exitCode"
             }

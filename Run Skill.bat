@@ -12,6 +12,24 @@ if not exist "%RUNNER%" (
     exit /b 1
 )
 
+if not "%~1"=="" goto run_once
+
+:run_menu
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%RUNNER%" %*
+set "EXIT_CODE=%ERRORLEVEL%"
+
+echo.
+if "%EXIT_CODE%"=="0" (
+    echo Done.
+) else (
+    echo Finished with errors. Exit code: %EXIT_CODE%
+)
+echo.
+echo Press any key to return to the skill menu, or close this window to exit.
+pause >nul
+goto run_menu
+
+:run_once
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%RUNNER%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 
