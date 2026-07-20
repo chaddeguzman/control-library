@@ -1,17 +1,10 @@
-# Local-only folders (per README) -- these hold per-run, per-user files
-# and should never be committed to the shared repo. Each folder's own
-# README.md stays tracked; everything else in it is ignored.
+# Local Obsidian/cache files
+.trash/
+.DS_Store
+Thumbs.db
 
-# 1 inbound/ -- drop zone for source files
-1 inbound/*
-!1 inbound/README.md
-!1 inbound/Done/
-1 inbound/Done/*
-!1 inbound/Done/.gitkeep
-
-# 2 harness/logs/ -- per-run logs
-2 harness/logs/*.log
-
-# 6 output/ -- generated Markdown output
-6 output/*
-!6 output/README.md
+# Optional local working areas
+control-library/03-Document-Intake/Uploaded-Source-Docs/*
+!control-library/03-Document-Intake/Uploaded-Source-Docs/README.md
+control-library/03-Document-Intake/Generated-Clones/*
+!control-library/03-Document-Intake/Generated-Clones/README.md

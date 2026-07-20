@@ -179,6 +179,7 @@
   },
   "active": "943fb4035af57148",
   "lastOpenFiles": [
+    "control-library",
     "index.html",
     "assets/style.css",
     "assets/script.js",
@@ -200,7 +201,6 @@
     "3 skills",
     "2 harness/validation checks/README.md",
     "2 harness/hard rules/README.md",
-    "2 harness/validation checks",
     "1 inbound/README.md",
     "02-Technical-Documentation/Technical Doc Quality Bar.md",
     "06-Canvases/Technical Document Anatomy.canvas",
