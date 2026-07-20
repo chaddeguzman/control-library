@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {"id": "template", "type": "file", "file": "02-Technical-Documentation/Templates/Technical Documentation Template.md", "x": -80, "y": -40, "width": 320, "height": 200},
+    {"id": "quality", "type": "file", "file": "02-Technical-Documentation/Technical Doc Quality Bar.md", "x": -480, "y": -220, "width": 300, "height": 180},
+    {"id": "prompts", "type": "file", "file": "04-AI-Operating-System/Prompts/Technical Documentation Prompt Pack.md", "x": 360, "y": -220, "width": 320, "height": 180},
+    {"id": "parsed", "type": "file", "file": "03-Document-Intake/Parsed-Context/README.md", "x": -480, "y": 120, "width": 300, "height": 180},
+    {"id": "clones", "type": "file", "file": "03-Document-Intake/Generated-Clones/README.md", "x": 360, "y": 120, "width": 300, "height": 180}
+  ],
+  "edges": [
+    {"id": "t1", "fromNode": "quality", "fromSide": "right", "toNode": "template", "toSide": "left"},
+    {"id": "t2", "fromNode": "prompts", "fromSide": "left", "toNode": "template", "toSide": "right"},
+    {"id": "t3", "fromNode": "parsed", "fromSide": "right", "toNode": "template", "toSide": "left"},
+    {"id": "t4", "fromNode": "template", "fromSide": "right", "toNode": "clones", "toSide": "left"}
+  ]
+}

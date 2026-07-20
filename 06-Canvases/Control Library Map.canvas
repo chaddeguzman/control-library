@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    {"id": "home", "type": "file", "file": "00-Control-Library/Home.md", "x": -520, "y": -120, "width": 280, "height": 180},
+    {"id": "brief", "type": "file", "file": "01-Product-Vision/Product Brief.md", "x": -180, "y": -260, "width": 300, "height": 180},
+    {"id": "scope", "type": "file", "file": "01-Product-Vision/Scope Guardrails.md", "x": -180, "y": 20, "width": 300, "height": 180},
+    {"id": "tech", "type": "file", "file": "02-Technical-Documentation/Technical Documentation Index.md", "x": 180, "y": -260, "width": 300, "height": 180},
+    {"id": "intake", "type": "file", "file": "03-Document-Intake/Intake Index.md", "x": 180, "y": 20, "width": 300, "height": 180},
+    {"id": "aios", "type": "file", "file": "04-AI-Operating-System/AI Operating System Index.md", "x": 540, "y": -120, "width": 300, "height": 180}
+  ],
+  "edges": [
+    {"id": "e1", "fromNode": "home", "fromSide": "right", "toNode": "brief", "toSide": "left"},
+    {"id": "e2", "fromNode": "home", "fromSide": "right", "toNode": "scope", "toSide": "left"},
+    {"id": "e3", "fromNode": "brief", "fromSide": "right", "toNode": "tech", "toSide": "left"},
+    {"id": "e4", "fromNode": "scope", "fromSide": "right", "toNode": "intake", "toSide": "left"},
+    {"id": "e5", "fromNode": "tech", "fromSide": "right", "toNode": "aios", "toSide": "left"},
+    {"id": "e6", "fromNode": "intake", "fromSide": "right", "toNode": "aios", "toSide": "left"}
+  ]
+}

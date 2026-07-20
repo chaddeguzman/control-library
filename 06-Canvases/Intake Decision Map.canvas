@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    {"id": "source", "type": "file", "file": "03-Document-Intake/Uploaded-Source-Docs/README.md", "x": -620, "y": -40, "width": 260, "height": 160},
+    {"id": "classifier", "type": "file", "file": "02-Technical-Documentation/Technical Doc Intent Model.md", "x": -280, "y": -180, "width": 300, "height": 180},
+    {"id": "rules", "type": "file", "file": "04-AI-Operating-System/Rules/Generation Rules.md", "x": -280, "y": 100, "width": 300, "height": 180},
+    {"id": "tech-route", "type": "file", "file": "05-Workflows/Technical Documentation Clone Workflow.md", "x": 120, "y": -180, "width": 320, "height": 180},
+    {"id": "roadmap", "type": "file", "file": "04-AI-Operating-System/Skills-Roadmap/Future Skills Registry.md", "x": 120, "y": 100, "width": 320, "height": 180},
+    {"id": "backlog", "type": "file", "file": "08-Backlog/Backlog.md", "x": 520, "y": 100, "width": 280, "height": 160}
+  ],
+  "edges": [
+    {"id": "i1", "fromNode": "source", "fromSide": "right", "toNode": "classifier", "toSide": "left"},
+    {"id": "i2", "fromNode": "source", "fromSide": "right", "toNode": "rules", "toSide": "left"},
+    {"id": "i3", "fromNode": "classifier", "fromSide": "right", "toNode": "tech-route", "toSide": "left", "label": "technical intent"},
+    {"id": "i4", "fromNode": "classifier", "fromSide": "right", "toNode": "roadmap", "toSide": "left", "label": "future skill"},
+    {"id": "i5", "fromNode": "rules", "fromSide": "right", "toNode": "roadmap", "toSide": "left"},
+    {"id": "i6", "fromNode": "roadmap", "fromSide": "right", "toNode": "backlog", "toSide": "left"}
+  ]
+}

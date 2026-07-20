@@ -1,0 +1,18 @@
+{
+	"nodes":[
+		{"id":"upload","type":"file","file":"03-Document-Intake/Uploaded-Source-Docs/README.md","x":-680,"y":-60,"width":260,"height":160},
+		{"id":"parsed","type":"file","file":"03-Document-Intake/Parsed-Context/README.md","x":-360,"y":-60,"width":260,"height":160},
+		{"id":"intent","type":"file","file":"02-Technical-Documentation/Technical Doc Intent Model.md","x":-40,"y":-60,"width":280,"height":160},
+		{"id":"template","type":"file","file":"02-Technical-Documentation/Templates/Technical Documentation Template.md","x":300,"y":-180,"width":300,"height":180},
+		{"id":"clone","type":"file","file":"03-Document-Intake/Generated-Clones/README.md","x":660,"y":-60,"width":260,"height":160},
+		{"id":"quality","type":"file","file":"02-Technical-Documentation/Technical Doc Quality Bar.md","x":300,"y":100,"width":300,"height":160}
+	],
+	"edges":[
+		{"id":"p1","fromNode":"upload","fromSide":"right","toNode":"parsed","toSide":"left"},
+		{"id":"p2","fromNode":"parsed","fromSide":"right","toNode":"intent","toSide":"left"},
+		{"id":"p3","fromNode":"intent","fromSide":"right","toNode":"template","toSide":"left"},
+		{"id":"p4","fromNode":"template","fromSide":"right","toNode":"clone","toSide":"left"},
+		{"id":"p5","fromNode":"clone","fromSide":"bottom","toNode":"quality","toSide":"right"},
+		{"id":"p6","fromNode":"quality","fromSide":"left","toNode":"intent","toSide":"bottom"}
+	]
+}

@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    {"id": "index", "type": "file", "file": "04-AI-Operating-System/AI Operating System Index.md", "x": -40, "y": -40, "width": 300, "height": 180},
+    {"id": "context", "type": "file", "file": "04-AI-Operating-System/Context/Workspace Context.md", "x": -420, "y": -260, "width": 280, "height": 160},
+    {"id": "memory", "type": "file", "file": "04-AI-Operating-System/Memory/Durable Product Memory.md", "x": -420, "y": 120, "width": 280, "height": 160},
+    {"id": "rules", "type": "file", "file": "04-AI-Operating-System/Rules/Generation Rules.md", "x": 340, "y": -260, "width": 280, "height": 160},
+    {"id": "hooks", "type": "file", "file": "04-AI-Operating-System/Hooks/Workflow Hooks.md", "x": 340, "y": 120, "width": 280, "height": 160},
+    {"id": "prompts", "type": "file", "file": "04-AI-Operating-System/Prompts/Technical Documentation Prompt Pack.md", "x": -40, "y": 300, "width": 300, "height": 160}
+  ],
+  "edges": [
+    {"id": "a1", "fromNode": "index", "fromSide": "left", "toNode": "context", "toSide": "right"},
+    {"id": "a2", "fromNode": "index", "fromSide": "left", "toNode": "memory", "toSide": "right"},
+    {"id": "a3", "fromNode": "index", "fromSide": "right", "toNode": "rules", "toSide": "left"},
+    {"id": "a4", "fromNode": "index", "fromSide": "right", "toNode": "hooks", "toSide": "left"},
+    {"id": "a5", "fromNode": "index", "fromSide": "bottom", "toNode": "prompts", "toSide": "top"}
+  ]
+}

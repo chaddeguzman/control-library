@@ -127,3 +127,18 @@ To choose a TechSpecGen output format without using the prompt, pass `-OutputFor
 Dry run checks the selected skill, always-on rules, validation checks, matching references, matching templates, and pending inbound files without creating output or moving source files.
 
 Each run writes a log file to `2 harness/logs/`.
+
+## Obsidian Control Library Vault
+
+This repository also contains an Obsidian vault for planning and operating the Control Library workspace.
+
+Key entry points:
+
+- `Welcome.md`
+- `00-Control-Library/Home.md`
+- `02-Technical-Documentation/Templates/Technical Documentation Template.md`
+- `04-AI-Operating-System/AI Operating System Index.md`
+- `05-Workflows/Technical Documentation Clone Workflow.md`
+- `06-Canvases/Control Library Map.canvas`
+
+The vault keeps AI context, memory, rules, hooks, prompts, and future skills separated so technical documentation generation can stay controlled while future capabilities are designed.

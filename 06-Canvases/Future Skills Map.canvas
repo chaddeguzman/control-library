@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    {"id": "scope", "type": "file", "file": "01-Product-Vision/Scope Guardrails.md", "x": -520, "y": -80, "width": 300, "height": 180},
+    {"id": "registry", "type": "file", "file": "04-AI-Operating-System/Skills-Roadmap/Future Skills Registry.md", "x": -140, "y": -80, "width": 320, "height": 200},
+    {"id": "workflow", "type": "file", "file": "05-Workflows/Technical Documentation Clone Workflow.md", "x": 280, "y": -220, "width": 320, "height": 180},
+    {"id": "backlog", "type": "file", "file": "08-Backlog/Backlog.md", "x": 280, "y": 80, "width": 320, "height": 180}
+  ],
+  "edges": [
+    {"id": "f1", "fromNode": "scope", "fromSide": "right", "toNode": "registry", "toSide": "left"},
+    {"id": "f2", "fromNode": "registry", "fromSide": "right", "toNode": "workflow", "toSide": "left"},
+    {"id": "f3", "fromNode": "registry", "fromSide": "right", "toNode": "backlog", "toSide": "left"}
+  ]
+}

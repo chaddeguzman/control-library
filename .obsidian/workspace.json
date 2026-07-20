@@ -1,0 +1,226 @@
+{
+  "main": {
+    "id": "076b600d78836118",
+    "type": "split",
+    "children": [
+      {
+        "id": "a99134fe4bd7e4d7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3643731dd734f904",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8c66e84ee429a9f2",
+    "type": "split",
+    "children": [
+      {
+        "id": "da96dbdee8556b91",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "85777acbb3799b3d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "943fb4035af57148",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "e46c32e039150b5c",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c45c89fbc696960e",
+    "type": "split",
+    "children": [
+      {
+        "id": "1a90f5a02ef4fd14",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8f9c3fa08b0fd6c8",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "b567125ac76f0717",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "c5ba6540718b9a70",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "94acec3f51808030",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "bc9a67707fc1f0c4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "943fb4035af57148",
+  "lastOpenFiles": [
+    "index.html",
+    "assets/style.css",
+    "assets/script.js",
+    "assets/favicon.svg",
+    "assets",
+    "Run Skill.bat",
+    "README.md",
+    "6 output/README.md",
+    "6 output",
+    "5 templates/README.md",
+    "5 templates/object-name-report.md",
+    "5 templates/object-name-report.doc",
+    "5 templates",
+    "4 references/README.md",
+    "4 references",
+    "3 skills/TechSpecGen.md",
+    "3 skills/FuncSpecGen.md",
+    "3 skills/CreateSkill.MD",
+    "3 skills",
+    "2 harness/validation checks/README.md",
+    "2 harness/hard rules/README.md",
+    "2 harness/validation checks",
+    "1 inbound/README.md",
+    "02-Technical-Documentation/Technical Doc Quality Bar.md",
+    "06-Canvases/Technical Document Anatomy.canvas",
+    "06-Canvases/Intake Decision Map.canvas",
+    "Welcome.md",
+    "08-Backlog/Backlog.md",
+    "07-Decisions/Decision Log.md",
+    "06-Canvases/Technical Documentation Pipeline.canvas",
+    "06-Canvases/Future Skills Map.canvas",
+    "06-Canvases/AI Operating System.canvas",
+    "00-Control-Library/Home.md",
+    "06-Canvases/Control Library Map.canvas",
+    "09-Archive/README.md",
+    "05-Workflows/AI Session Startup Checklist.md",
+    "05-Workflows/Technical Documentation Clone Workflow.md",
+    "04-AI-Operating-System/Skills-Roadmap/Future Skills Registry.md",
+    "04-AI-Operating-System/Prompts/Technical Documentation Prompt Pack.md",
+    "04-AI-Operating-System/Hooks/Workflow Hooks.md",
+    "04-AI-Operating-System/Rules/Generation Rules.md",
+    "04-AI-Operating-System/Memory/Durable Product Memory.md",
+    "04-AI-Operating-System/Context/Workspace Context.md"
+  ]
+}

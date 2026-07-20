@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.path != ""
+views:
+  - type: table
+    name: Control Library Notes
+    order:
+      - file.name
+      - file.folder
