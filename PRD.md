@@ -57,12 +57,15 @@ The repository must expose a static website with:
 - `style.css`
 - `script.js`
 
-These files live under `control-library/`, with a root redirect so GitHub Pages remains viewable at the repository URL.
+These files live at the repository root so GitHub Pages serves the existing
+repository URL directly.
 
 ## Success Criteria
 
-- The repository is organized under `control-library/`.
+- The repository root contains the Control Library vault and static site.
 - Non-PRD harness/runtime folders are removed.
 - The static site is viewable online.
 - Obsidian vault files remain usable locally.
+- Local Obsidian settings remain untracked, with reusable defaults under `system/obsidian-template/`.
 - Future skills are visible in the roadmap but not mixed into the active technical documentation workflow.
+

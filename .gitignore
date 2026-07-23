@@ -2,9 +2,14 @@
 .trash/
 .DS_Store
 Thumbs.db
+.obsidian/
 
 # Optional local working areas
-control-library/03-Document-Intake/Uploaded-Source-Docs/*
-!control-library/03-Document-Intake/Uploaded-Source-Docs/README.md
-control-library/03-Document-Intake/Generated-Clones/*
-!control-library/03-Document-Intake/Generated-Clones/README.md
+03-Document-Intake/Uploaded-Source-Docs/*
+!03-Document-Intake/Uploaded-Source-Docs/README.md
+03-Document-Intake/Generated-Clones/*
+!03-Document-Intake/Generated-Clones/README.md
+
+# Main Brain is maintained as a separate sibling repository.
+main-brain/
+
